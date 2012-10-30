@@ -1,0 +1,105 @@
+# Display the Mach Number profile
+# Sam Geen, Jan 2012
+
+from pymses import RamsesOutput
+from pymses.utils.regions import Sphere
+from pymses.filters import CellsToPoints
+from pymses.analysis import sample_points
+from pymses.analysis import bin_spherical
+from pymses.filters import RegionFilter
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Turns velocities in Pymses classes into speeds
+# Note to self: Do not make up function names while tired
+def SpeedMachine(source):
+    # Get velocity
+    v = source["vel"]
+    # Find speed
+    speed = np.sqrt(v[:,0]**2. + v[:,1]**2. +v[:,2]**2.)
+    # Insert new data source
+    source.add_vectors("spd",speed)
+    # Done!
+
+# TODO - Polymorphic with particles, make non-spherical?
+class ProfileMaker(object):
+    def __init__(self, snap):
+        self._snap = snap 
+        self._centre = [0.5,0.5,0.5]
+        self._radius = 1.
+
+    def Shape(self, centre, radius):
+        self._centre = centre
+        self._radius = radius
+
+    # Make a profile with a given hydro var
+    def MakeProfile(self, hydrovar):
+        # Get data from snapshot
+        # If the field is speed ("spd"), derive it from vel
+        if hydrovar != "spd":
+            amr = self._snap.amr_source([hydrovar])
+        else:
+            amr = self._snap.amr_source(["vel"])
+        # Monte-carlo sample AMR cells
+        sphere = Sphere(self._centre,self._radius)
+        points = sphere.random_points(1.0e6)
+        samples = sample_points(amr, points)
+        if hydrovar == "spd":
+            # Find speed
+            SpeedMachine(samples)
+        #import pdb
+        #pdb.set_trace()
+        # Make bins
+        weight_func = lambda dset: dset[hydrovar]
+        r_bins = np.linspace(0.0, self._radius, 200)
+        # Make profile
+        profile = bin_spherical(samples, self._centre,weight_func, r_bins, divide_by_counts=True)
+        r_bins = r_bins[1:len(r_bins)]
+        return (r_bins,profile)
+
+    # Sample amr cells
+    def _SampleCells(self,sample):
+        cell_source = CellsToPoints(amr)
+        return cell_source.flatten()
+
+# This is oh so hacky, if you're using this and your name isn't Sam Geen 
+#                                                      THEN GOD HELP YOU
+def mach(outnum=100,name="mach"):
+    # Open output
+    snap = RamsesOutput(".", outnum)
+    # Get profiles for relevant variables
+    gamma = 5./3.
+    pmaker = ProfileMaker(snap)
+    # Switch betwen different uses
+    if name == "mach":
+        r,dens = pmaker.MakeProfile("rho")
+        r,pres = pmaker.MakeProfile("P")
+        r,spd  = pmaker.MakeProfile("spd")
+        # Calculate mach number profile
+        prof = np.sqrt(spd**2. * dens / (gamma * pres))
+    if name == "pressure":
+        r,prof = pmaker.MakeProfile("P")
+    if name == "speed":
+        r,prof = pmaker.MakeProfile("spd")
+    if name == "density":
+        r,prof = pmaker.MakeProfile("rho")
+    # NOTE: "quirk" refers to Quirk 1994; pressure difference between cells 
+    if name == "quirk":
+        r,pres = pmaker.MakeProfile("P")
+        lp = len(pres)
+        pright = np.array(pres[1:lp])
+        pleft = np.array(pres[0:lp-1])
+        rright = np.array(r[1:lp])
+        rleft = np.array(r[0:lp-1])
+        prof = np.abs((pright - pleft)/(rright-rleft))
+        r = rright
+
+    #print len(r), len(vel)
+    #print vel.shape
+    plt.plot(r,prof)
+    plt.savefig("profile_"+name+".pdf",format="pdf")
+    print "DONE"
+
+if __name__=="__main__":
+    # Pick an arbitrary output number
+    mach(20)
