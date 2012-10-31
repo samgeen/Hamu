@@ -64,15 +64,14 @@ class SliceMaker(object):
             else:
                 range = copy(self._range)
         # Run through them all again now that we have the range
-        print "Min/max values: ",range        
-        print "Making images"
+        print, "Making images"
         for snap in snaps:
             # Make the images
             self._MakeImage(snap, range)
         # Clean up
-        print "Cleaning up"
+        print, "Cleaning up"
         self._slices.clear()
-        print "Done"
+        print, "Done"
 
     # Pre-process the slices
     def _PreProcess(self, snap):

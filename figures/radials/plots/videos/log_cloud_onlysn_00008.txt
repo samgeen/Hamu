@@ -1,0 +1,4 @@
+simname: cloud_onlysn_00008
+actual time of output: 14.215yr
+output number: 18
+original data at: /home/samgeen/SN_Project/runs/Production/08_standard_noise_10K/02_coolsn/

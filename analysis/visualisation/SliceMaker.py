@@ -15,8 +15,6 @@ corner=True
 fixmin = -4.5
 fixmax = 6.0
 
-axis = 'y'
-
 class SliceMaker(object):
     def __init__(self,sim,hydrovar="rho",min=0.0,max=0.0,corner=True):
         # Simulation name
@@ -66,7 +64,6 @@ class SliceMaker(object):
             else:
                 range = copy(self._range)
         # Run through them all again now that we have the range
-        print "Min/max values: ",range        
         print "Making images"
         for snap in snaps:
             # Make the images
@@ -93,8 +90,7 @@ class SliceMaker(object):
             print "Setting up data slice"
             cam  = Camera(center=[0.5, 0.5, 0.5], line_of_sight_axis='z', \
                           region_size=[1.0, 1.0],\
-                          up_vector=axis, map_max_size=1024, \
-                          log_sensitive=True)
+                          up_vector='y', map_max_size=1024, log_sensitive=True)
             rho_op = ScalarOperator(lambda dset: dset[var])
             # Start plotting the density slice
             print "Plotting data slice"

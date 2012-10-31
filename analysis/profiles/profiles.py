@@ -34,7 +34,7 @@ def ReadPickle(hydroname, outnum,folder="./"):
 
 # File prefix
 def Prefile(hydroname,outnum,makefolder=False,folder="./"):
-    folder += "profiles_"+hydroname+"/"
+    folder += "/profiles_"+hydroname+"/"
     if not os.path.isdir(folder):
         os.system("mkdir "+folder)
     prefile = folder+"profile_"+str(outnum)+"_"+hydroname

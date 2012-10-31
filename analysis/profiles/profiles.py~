@@ -69,6 +69,9 @@ def prof(outnum=100,name="mach",snaplocation="./"):
         r,prof = pmaker.MakeProfile("P")
         ytitle = "Pressure"
         prof *= snap.info["unit_pressure"].express(C.dyne)
+    if name == "metal":
+        r,prof = pmaker.MakeProfile("Z")
+        ytitle = "Metallicity / Zsolar"
     if name == "velocity_radial":
         ylog = False
         r,prof = pmaker.MakeProfile("vrad")
@@ -157,8 +160,6 @@ def runall():
         prof(snap, "velocity_turbulent")
         plt.clf()
         prof(snap, "pressure")
-
-
 
 if __name__=="__main__":
     # Pick an arbitrary output number

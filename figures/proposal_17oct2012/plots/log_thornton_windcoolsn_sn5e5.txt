@@ -1,0 +1,4 @@
+simname: thornton_windcoolsn_sn5e5
+actual time of output: 14.625yr
+output number: 396
+original data at: /home/samgeen/SN_Project/runs/Production/09_Thornton_corner_hllc_c0p5/03_windcoolsn/

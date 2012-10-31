@@ -10,7 +10,7 @@ import findoutput
 import matplotlib.image as mpimg
 
 # Plot a single image with axes and everything
-def plot(outnum,snaploc,savename,boxlen=100.,corner=True):
+def plot(outnum,snaploc,savename,boxlen=100.,corner=True,frac=1.0):
     # Set up figure
     fig = plt.figure()
     ax  = fig.add_subplot(111)
@@ -25,6 +25,14 @@ def plot(outnum,snaploc,savename,boxlen=100.,corner=True):
         extent=(0,boxlen,boxlen,0)
     else:
         extent=(-br,br,-br,br)
+    if frac < 1.0:
+        if corner:
+            c = len(im) # ASSUMES A SQUARE!!!
+            c = int(c*frac)
+            im = im[0:c,0:c]
+        else:
+            print "Centre frac code not implemented yet"
+            raise NotImplementedError
     imrange = (-4.5,6.0)
     d,u = imrange
     cax = ax.imshow(im, interpolation='nearest',\

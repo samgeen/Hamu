@@ -44,6 +44,7 @@ def ProfileMax(sim,alwaysbigger=False,allabovebackground=False):
     return radii
 
 def ShockGraph(sim,allabovebackground=False,alwaysbigger=True):
+    print "Processing simulation",sim.Location()
     # Run through the simulation, finding the highest pressure peak
     times = list()
     # Get radii

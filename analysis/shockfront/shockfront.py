@@ -35,8 +35,9 @@ def ProfileMax(sim,alwaysbigger=False,allabovebackground=False):
             init = profiles.ReadPickle("density",1,sim.Location()+"/")
             bckg = numpy.max(init.profile[1:len(init.profile)])
             cp = pr > bckg # add a floor to ignore noise in background
-            rmax = rr[cp]
-            rmax = numpy.max(rmax)
+            if len(rr[cp]) > 0:
+                rmax = rr[cp]
+                rmax = numpy.max(rmax)
         if alwaysbigger:
             # NOTE: USING *roughly* BIGGER TO ALLOW FLUCTUATING STATIC SHOCKS
             rfloor = 0.5*rmax

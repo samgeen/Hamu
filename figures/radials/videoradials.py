@@ -2,9 +2,13 @@
 # Uses radials.py routine
 # Sam Geen, October 2012
 
+import Hamu
+from SimData.Simulation import Simulation
+import numpy as np
 import radials
 
 radials.imgtype = "png"
+radials.folder = "videos"
 
 def run(runtype="sn"):
     '''
@@ -26,7 +30,7 @@ def run(runtype="sn"):
 
     top = "/home/samgeen/SN_Project/runs/Production/"
     # TODO: PUT BACK IN WINDS
-    runstubs = ["01_onlysn","02_coolsn"]
+    runstubs = ["02_coolsn"]
     runtitles = ["onlysn","coolsn"]
     snonly = [True,True]
     if wind:
@@ -58,11 +62,11 @@ def run(runtype="sn"):
 
     # Times to output at
     times = np.array([1e4,1e5,2e5,1e6])+14.125e6
-    times /= 1e6 # Internal units are Myr
     timestrs = ["1e4yr","1e5yr","2e5yr","1e6yr"]
-    temp = np.arange(1e4,1e6,1e4)
-    times = np.array(temp)+14.125e6
-    timestrs = 
+    rawtimes = np.arange(1e4,1e6,1e4)
+    times = np.array(rawtimes)+14.125e6
+    timestrs = [str(x) + "yr" for x in times]    
+    times /= 1e6 # Internal units are Myr
     if wind:
         times = np.array([5.0,10.0,12.0,14.0,15.125])
         timestrs = ["5e6yr","10e6yr","12e6yr","14e6yr","sn1e6"]
@@ -78,13 +82,17 @@ def run(runtype="sn"):
     #    suite[name] = Simulation(sim)
 
     # Run radial profiles
+    nums = range(0,len(times))
     for sim, name, corner, boxlen in zip(sims, names, corners,boxlens):
-        for time, tstr in zip(times, timestrs):
+        for time, num in zip(times, nums):
+            numstr = '%(num)05d' % {'num': num}
             print "Plotting for run", name, "at", time,"yr"
             print "Folder:", sim
             print "Run in corner?", str(corner)
-            plotter = Radials(Simulation(sim),name+"_"+tstr,time,\
-                                  corner,boxlen,wind)
+            plotter = radials.Radials(Simulation(name,sim),\
+                                          name+"_"+numstr,\
+                                          time,\
+                                          corner,boxlen,wind)
             plotter.Run()
 
 if __name__=="__main__":

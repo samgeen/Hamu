@@ -9,6 +9,33 @@ import numpy as np
 import findoutput
 import matplotlib.image as mpimg
 
+# Plot a single image with axes and everything
+def plot(outnum,snaploc,savename,boxlen=100.,corner=True):
+    # Set up figure
+    fig = plt.figure()
+    ax  = fig.add_subplot(111)
+    # Load image
+    # REQUIRES TESTSLICE.PY TO HAVE BEEN RUN FIRST
+    outstr = "%(num)05d" % {'num':outnum}
+    loc = snaploc+"/slices/slice"+outstr+"_1.png"
+    im = mpimg.imread(loc)
+    # Display imagex
+    br = boxlen / 2
+    if corner:
+        extent=(0,boxlen,boxlen,0)
+    else:
+        extent=(-br,br,-br,br)
+    imrange = (-4.5,6.0)
+    d,u = imrange
+    cax = ax.imshow(im, interpolation='nearest',\
+                        extent=extent,vmin=d,vmax=u)
+    # Add colour bar
+    cbar = fig.colorbar(cax)
+    cbar.set_label("Density / atoms/cm$^{3}$")
+    plt.savefig(savename+".pdf",format="pdf")
+
+
+'''
 class MultiImage(object):
     
     def __init__(self):
@@ -104,6 +131,7 @@ class MultiImage(object):
 def run():
     m = MultiImage()
     m.Run()
-
+'''
 if __name__=="__main__":
-    run()
+    plot(100,".","plotslice_test")
+

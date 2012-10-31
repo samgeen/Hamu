@@ -1,0 +1,4 @@
+simname: 04_lvl8_00004
+actual time of output: 15.125yr
+output number: 317
+original data at: /home/samgeen/SN_Project/runs/ResTest/01_Thornton/04_lvl8

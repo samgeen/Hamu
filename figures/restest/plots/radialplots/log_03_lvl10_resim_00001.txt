@@ -1,0 +1,4 @@
+simname: 03_lvl10_resim_00001
+actual time of output: 10.0yr
+output number: 658
+original data at: /home/samgeen/SN_Project/runs/ResTest/01_Thornton/03_lvl10_resim

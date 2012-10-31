@@ -1,0 +1,4 @@
+simname: full_res_00002
+actual time of output: 12.0yr
+output number: 327
+original data at: /home/samgeen/SN_Project/runs/Production/09_Thornton_corner_hllc_c0p5/03_windcoolsn/

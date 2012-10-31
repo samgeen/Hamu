@@ -1,0 +1,214 @@
+ssmod.f90(2): error #7002: Error in opening the compiled module file.  Check INCLUDE paths.   [SINGLE_STAR_MODULE]
+  use single_star_module
+------^
+ssmod.f90(3): error #7002: Error in opening the compiled module file.  Check INCLUDE paths.   [STARPOP_WIND_MODULE]
+  use starpop_wind_module
+------^
+ssmod.f90(4): error #7002: Error in opening the compiled module file.  Check INCLUDE paths.   [HYDRO_PARAMETERS]
+  use hydro_parameters
+------^
+ssmod.f90(7): error #6683: A kind type parameter must be a compile-time constant.   [DP]
+  real(dp) ::ageIn
+-------^
+ssmod.f90(8): error #6683: A kind type parameter must be a compile-time constant.   [DP]
+  real(dp) ::spdout,mlout,tempout,radout,momout,teout,keout
+-------^
+ssmod.f90(48): error #6404: This name does not have a type, and must have an explicit type.   [DEBUG_LKUP]
+      debug_lkup=.true.
+------^
+ssmod.f90(48): error #6303: The assignment operation or the binary expression operation is invalid for the data types of the two operands.
+      debug_lkup=.true.
+-----------------^
+ssmod.f90(51): error #6404: This name does not have a type, and must have an explicit type.   [GAMMA]
+     write(*,*)'Gamma = ',gamma
+--------------------------^
+compilation aborted for ssmod.f90 (code 1)
+single_star_module.f90(15): error #7002: Error in opening the compiled module file.  Check INCLUDE paths.   [AMR_PARAMETERS]
+use amr_parameters
+----^
+single_star_module.f90(16): error #7002: Error in opening the compiled module file.  Check INCLUDE paths.   [HYDRO_PARAMETERS]
+use hydro_parameters
+----^
+single_star_module.f90(17): error #7002: Error in opening the compiled module file.  Check INCLUDE paths.   [LOOKUP_TABLE_MODULE]
+use lookup_table_module
+----^
+single_star_module.f90(23): error #6457: This derived type name has not been declared.   [LOOKUP_TABLE]
+type(lookup_table) :: massloss_table
+-----^
+single_star_module.f90(24): error #6457: This derived type name has not been declared.   [LOOKUP_TABLE]
+type(lookup_table) :: momentum_table
+-----^
+single_star_module.f90(25): error #6457: This derived type name has not been declared.   [LOOKUP_TABLE]
+type(lookup_table) :: kenergy_table ! kinetic
+-----^
+single_star_module.f90(26): error #6457: This derived type name has not been declared.   [LOOKUP_TABLE]
+type(lookup_table) :: tenergy_table ! thermal
+-----^
+single_star_module.f90(66): error #6683: A kind type parameter must be a compile-time constant.   [DP]
+  real(dp)::mass, age, metal,logage
+-------^
+single_star_module.f90(67): error #6683: A kind type parameter must be a compile-time constant.   [DP]
+  real(dp),intent(out)::masslossout, momentumout, kenergyout, tenergyout
+-------^
+single_star_module.f90(68): error #6683: A kind type parameter must be a compile-time constant.   [DP]
+  real(dp)::ageInternal
+-------^
+single_star_module.f90(97): error #6683: A kind type parameter must be a compile-time constant.   [DP]
+  real(dp)::mass, metal
+-------^
+single_star_module.f90(98): error #6683: A kind type parameter must be a compile-time constant.   [DP]
+  real(dp),intent(out)::fmassout, lifetimeout, snenergyout
+-------^
+single_star_module.f90(35): error #6404: This name does not have a type, and must have an explicit type.   [MASSLOSS_TABLE]
+  call setup_table(massloss_table, filename)
+-------------------^
+single_star_module.f90(37): error #6404: This name does not have a type, and must have an explicit type.   [MOMENTUM_TABLE]
+  call setup_table(momentum_table, filename)
+-------------------^
+single_star_module.f90(39): error #6404: This name does not have a type, and must have an explicit type.   [KENERGY_TABLE]
+  call setup_table(kenergy_table, filename)
+-------------------^
+single_star_module.f90(41): error #6404: This name does not have a type, and must have an explicit type.   [TENERGY_TABLE]
+  call setup_table(tenergy_table, filename)
+-------------------^
+single_star_module.f90(78): warning #7319: This argument's data type is incompatible with this intrinsic procedure; procedure assumed EXTERNAL.   [DLOG10]
+  logage = DLOG10(ageInternal)+6d0
+------------------^
+single_star_module.f90(78): error #6404: This name does not have a type, and must have an explicit type.   [DLOG10]
+  logage = DLOG10(ageInternal)+6d0
+-----------^
+single_star_module.f90(85): error #6404: This name does not have a type, and must have an explicit type.   [GAMMA]
+  tenergyout = tenergyout / (gamma - 1d0)
+-----------------------------^
+compilation aborted for single_star_module.f90 (code 1)
+lookup_table_module.f90(7): error #7002: Error in opening the compiled module file.  Check INCLUDE paths.   [AMR_PARAMETERS]
+  use amr_parameters
+------^
+lookup_table_module.f90(27): error #6683: A kind type parameter must be a compile-time constant.   [DP]
+     real(dp),dimension(:,:,:,:),pointer   :: table
+----------^
+lookup_table_module.f90(31): error #6683: A kind type parameter must be a compile-time constant.   [DP]
+     real(dp), dimension(:), pointer       :: axis1
+----------^
+lookup_table_module.f90(32): error #6683: A kind type parameter must be a compile-time constant.   [DP]
+     real(dp), dimension(:), pointer       :: axis2
+----------^
+lookup_table_module.f90(33): error #6683: A kind type parameter must be a compile-time constant.   [DP]
+     real(dp), dimension(:), pointer       :: axis3
+----------^
+lookup_table_module.f90(34): error #6683: A kind type parameter must be a compile-time constant.   [DP]
+     real(dp), dimension(:), pointer       :: axis4
+----------^
+lookup_table_module.f90(56): error #7002: Error in opening the compiled module file.  Check INCLUDE paths.   [AMR_COMMONS]
+  use amr_commons
+------^
+lookup_table_module.f90(141): error #6683: A kind type parameter must be a compile-time constant.   [DP]
+  real(dp), intent(in)     :: v1, v2, v3 , v4
+-------^
+lookup_table_module.f90(142): error #6683: A kind type parameter must be a compile-time constant.   [DP]
+  real(dp), intent(out)    :: outval
+-------^
+lookup_table_module.f90(164): error #6683: A kind type parameter must be a compile-time constant.   [DP]
+  real(dp)             :: v1, v2, v3, v4, outval
+-------^
+lookup_table_module.f90(174): error #6683: A kind type parameter must be a compile-time constant.   [DP]
+  real(dp)             :: v1, v2, v3, v4, outval
+-------^
+lookup_table_module.f90(189): error #6683: A kind type parameter must be a compile-time constant.   [DP]
+  real(dp)             :: v1, v2, v3, v4, outval
+-------^
+lookup_table_module.f90(202): error #6683: A kind type parameter must be a compile-time constant.   [DP]
+  real(dp)           :: v1,  v2,  v3,  v4
+-------^
+lookup_table_module.f90(220): error #6683: A kind type parameter must be a compile-time constant.   [DP]
+  real(dp)                         :: value
+-------^
+lookup_table_module.f90(222): error #6683: A kind type parameter must be a compile-time constant.   [DP]
+  real(dp), dimension(:), pointer  :: axis
+-------^
+lookup_table_module.f90(253): error #6683: A kind type parameter must be a compile-time constant.   [DP]
+  real(dp), intent(in)     :: v1,v2
+-------^
+lookup_table_module.f90(254): error #6683: A kind type parameter must be a compile-time constant.   [DP]
+  real(dp)                 :: v1t,v2t,v3t,v4t
+-------^
+lookup_table_module.f90(255): error #6683: A kind type parameter must be a compile-time constant.   [DP]
+  real(dp), intent(out)    :: outval
+-------^
+lookup_table_module.f90(256): error #6683: A kind type parameter must be a compile-time constant.   [DP]
+  real(dp)                 :: x0,x1, y0,y1
+-------^
+lookup_table_module.f90(292): error #6683: A kind type parameter must be a compile-time constant.   [DP]
+  real(dp)                 :: v1,v2,v3,v4
+-------^
+lookup_table_module.f90(293): error #6683: A kind type parameter must be a compile-time constant.   [DP]
+  real(dp)                 :: v1t,v2t,v3t,v4t
+-------^
+lookup_table_module.f90(294): error #6683: A kind type parameter must be a compile-time constant.   [DP]
+  real(dp), intent(out)    :: outval
+-------^
+lookup_table_module.f90(295): error #6683: A kind type parameter must be a compile-time constant.   [DP]
+  real(dp)                 :: x0,x1, y0,y1, z0,z1
+-------^
+lookup_table_module.f90(65): error #6404: This name does not have a type, and must have an explicit type.   [MYID]
+        if(myid.eq.1) then 
+-----------^
+compilation aborted for lookup_table_module.f90 (code 1)
+amr_parameters.f90(5): warning #5117: Bad # preprocessor line
+#ifndef NPRE
+-^
+amr_parameters.f90(7): warning #5117: Bad # preprocessor line
+#else
+-^
+amr_parameters.f90(8): warning #5117: Bad # preprocessor line
+#if NPRE==4
+-^
+amr_parameters.f90(10): warning #5117: Bad # preprocessor line
+#else
+-^
+amr_parameters.f90(12): warning #5117: Bad # preprocessor line
+#endif
+-^
+amr_parameters.f90(13): warning #5117: Bad # preprocessor line
+#endif
+-^
+amr_parameters.f90(14): warning #5117: Bad # preprocessor line
+#ifdef QUADHILBERT
+-^
+amr_parameters.f90(16): warning #5117: Bad # preprocessor line
+#else
+-^
+amr_parameters.f90(18): warning #5117: Bad # preprocessor line
+#endif
+-^
+amr_parameters.f90(23): warning #5117: Bad # preprocessor line
+#ifndef NDIM
+-^
+amr_parameters.f90(25): warning #5117: Bad # preprocessor line
+#else
+-^
+amr_parameters.f90(27): warning #5117: Bad # preprocessor line
+#endif
+-^
+amr_parameters.f90(33): warning #5117: Bad # preprocessor line
+#ifndef NVECTOR
+-^
+amr_parameters.f90(35): warning #5117: Bad # preprocessor line
+#else
+-^
+amr_parameters.f90(37): warning #5117: Bad # preprocessor line
+#endif
+-^
+amr_parameters.f90(9): error #6418: This name has already been assigned a data type.   [DP]
+  integer,parameter::dp=kind(1.0E0) ! real*4
+---------------------^
+amr_parameters.f90(17): error #6418: This name has already been assigned a data type.   [QDP]
+  integer,parameter::qdp=kind(1.0_8) ! real*8
+---------------------^
+amr_parameters.f90(26): error #6418: This name has already been assigned a data type.   [NDIM]
+  integer,parameter::ndim=NDIM
+---------------------^
+amr_parameters.f90(36): error #6418: This name has already been assigned a data type.   [NVECTOR]
+  integer,parameter::nvector=NVECTOR
+---------------------^
+compilation aborted for amr_parameters.f90 (code 1)
