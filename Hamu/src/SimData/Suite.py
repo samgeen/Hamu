@@ -14,7 +14,7 @@ class Suite(object):
     def __init__(self, workingDirectory):
         self._dir = workingDirectory
         self._simulations = dict()
-        
+
     def __iter__(self):
         return self._simulations.itervalues()
     

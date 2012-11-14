@@ -14,20 +14,29 @@ import matplotlib.pyplot as plt
 def ProfileMax(sim,alwaysbigger=False,allabovebackground=False):
     radii = list()
     rmax = -1
-    print len(sim.Outputs())
+    #print len(sim.Outputs())
     rfloor = 0.
     for out in sim.Outputs():
-        prof = profiles.ReadPickle("density",out,sim.Location()+"/")
+        prof = profiles.ReadPickle("pressure",out,sim.Location()+"/")
         r = prof.radius
         p = prof.profile
         # Set a floor on radius
         cr = r >= rfloor
         rr = r[cr]
         pr = p[cr]
+        # Find the pressure at the background
+        pback = pr[len(pr)-1]
+        # Find the max radius that lies above this (with a 5% noise filter)
+        try:
+            cr = pr > pback+0.1
+            rr = rr[cr]
+            rmax = numpy.max(rr)
+        except:
+            rmax = 0.0
         # Find max inside this
-        cp = pr == numpy.max(pr)
-        rmax = rr[cp]
-        rmax = rmax[0]
+        #cp = pr == numpy.max(pr)
+        #rmax = rr[cp]
+        #rmax = rmax[0]
         # Reduce rmax to a single value (since it'll be an array currently)
         # Use every point above the background density?
         if allabovebackground:

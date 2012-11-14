@@ -9,7 +9,7 @@ import numpy as np
 import os
 import cPickle as pik
 
-corner = True
+corner = False
 
 # Structure for storing pickle data
 class Pickle(object):

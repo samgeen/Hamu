@@ -74,6 +74,14 @@ class Simulation(object):
         print "Found match with output",best,", %diff: ",pdiff, "at time ",times[best-1]
         return snap
     
+    def Folders(self):
+        # Find a list of folder locations
+        self._Prepare()
+        folders = list()
+        for nout in self._outputs:
+            folders.append(self._Outfolder(nout))
+        return folders
+
     # PROTECTED AUXILIARY METHODS
 
     # Locate all the outputs, general simulatin preparation

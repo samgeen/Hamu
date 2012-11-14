@@ -4,18 +4,19 @@
 import Hamu
 from SimData.Simulation import Simulation
 import shockfront
+import totalenergy
 import matplotlib.pyplot as plt
 
-def run():
+def run(mode="shock"):
     # Simulations to use
-    top = "/home/samgeen/SN_Project/runs/ResTest/01_Thornton/"
+    top = "/home/samgeen/SN_Project/runs/ResTest/02_ThorntonCentred/"
     sims = list()
-    sims.append("/home/samgeen/SN_Project/runs/Production/09_Thornton_corner_hllc_c0p5/03_windcoolsn")
+#    sims.append("/home/samgeen/SN_Project/runs/Production/09_Thornton_corner_hllc_c0p5/03_windcoolsn")
     sims.append(top+"01_lvl10")
     sims.append(top+"02_lvl9")
     sims.append(top+"04_lvl8")
-    sims.append(top+"03_lvl10_resim")
-    names = ["11 levels", "10 levels","9 levels","8 levels","10 level resim"]
+#    sims.append(top+"03_lvl10_resim")
+    names = ["10 levels","9 levels","8 levels"]
     # Make suite
     hamu = Hamu.Hamu(".")
     suite = hamu.MakeSuite("hybridtest")
@@ -26,9 +27,15 @@ def run():
     
     # Run shockfront for each sim
     graphs = list()
-    for sim in suite:
-        graphs.append(shockfront.ShockGraph(sim,allabovebackground=True))
-    
+    if mode == "shock":
+        for sim in suite:
+            graphs.append(shockfront.ShockGraph(sim))
+        outname = "shockfront"
+    elif mode == "totalenergy":
+        for sim in suite:
+            graphs.append(totalenergy.TotalEnergyGraph(sim))
+        outname = "totalenergy"
+
     # PLOT
     plt.figure()
     xtitle = "Time / Myr"
@@ -41,7 +48,8 @@ def run():
         iname += 1
     plt.legend()
     # Save pdf
-    plt.savefig("shockfront.pdf",format="pdf")
+    plt.savefig(outname+".pdf",format="pdf")
 
 if __name__=="__main__":
     run()
+    run("totalenergy")

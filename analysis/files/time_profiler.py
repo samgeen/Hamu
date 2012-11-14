@@ -77,6 +77,7 @@ def run(simfolder,idlethresh=20.0):
         #print "last modified: %s" % time.ctime(os.path.getmtime(file))
         times.append(os.path.getctime(folder))
     times = np.array(times)
+    print times
     times -= times[0]
     numtimes = len(times)
     rawtime = times[numtimes-1]

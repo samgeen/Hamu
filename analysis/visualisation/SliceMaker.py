@@ -16,7 +16,8 @@ fixmin = -4.5
 fixmax = 6.0
 
 class SliceMaker(object):
-    def __init__(self,sim,hydrovar="rho",min=0.0,max=0.0,corner=True):
+    def __init__(self,sim,hydrovar="rho",min=0.0,max=0.0,\
+                     corner=True,scale=1.0):
         # Simulation name
         self._sim = sim
         # Hydro variables
@@ -28,6 +29,9 @@ class SliceMaker(object):
         # Align the slice with the corner?
         # TODO: Allow more fluid slice geometry
         self._corner = corner
+        # Scale of box to display in
+        # (1.0 is the whole box, 0.5 is half the box, etc)
+        self._scale = scale
 
     # PUBLIC METHODS--------------
 
@@ -89,7 +93,7 @@ class SliceMaker(object):
             # Make camera + slice function
             print "Setting up data slice"
             cam  = Camera(center=[0.5, 0.5, 0.5], line_of_sight_axis='z', \
-                          region_size=[1.0, 1.0],\
+                          region_size=[self._scale, self._scale],\
                           up_vector='y', map_max_size=1024, log_sensitive=True)
             rho_op = ScalarOperator(lambda dset: dset[var])
             # Start plotting the density slice

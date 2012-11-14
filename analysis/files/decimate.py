@@ -14,15 +14,30 @@ def killfile(filename,verbose=False):
         if verbose:
             print "No file "+file
 
-def run(verbose=False):
+def run(verbose=False,double=False):
     outs = list()
     # Find all files not ending in "_1"
     for i in [0,2,3,4,5,6,7,8,9]:
         outstr = "ls -d output_????"+str(i)
-        out = sup.check_output(outstr,shell=True)
-        for o in out.split("\n"):
-            if len(o) > 0:
-                outs.append(o)
+        try:
+            out = sup.check_output(outstr,shell=True)
+            for o in out.split("\n"):
+                if len(o) > 0:
+                    outs.append(o)
+        except:
+            pass
+    # Find all files not with the number "???0?" if necesary
+    if double:
+        print "Double decimating..."
+        for i in [1,2,3,4,5,6,7,8,9]:
+            try:
+                outstr = "ls -d output_???"+str(i)+"1"
+                out = sup.check_output(outstr,shell=True)
+                for o in out.split("\n"):
+                    if len(o) > 0 and not o in outs:
+                        outs.append(o)
+            except:
+                pass
     outs = sorted(outs)
     # REMOVE THE LAST OUTPUT FROM THE KILL LIST
     outs.pop()
