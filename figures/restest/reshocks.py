@@ -24,6 +24,9 @@ def run(mode="shock"):
         sim = sims[i]
         name = names[i]
         suite[name] = Simulation(name,sim)
+    names = list()
+    for sim in suite:
+        names.append(sim.Name())
     
     # Run shockfront for each sim
     graphs = list()
