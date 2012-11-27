@@ -5,6 +5,8 @@ Created on Nov 27, 2012
 '''
 
 import numpy as np
+import matplotlib.pyplot as plt
+    
 
 class PhaseDiagram(object):
     '''
@@ -20,11 +22,44 @@ class PhaseDiagram(object):
         '''
         self._snap = snap
         self._length = length
+        self._rangeD = None
+        self._rangeT = None
     
-    def Plot(self, weighting="mass"):
+    def Plot(self, weightingType="mass",rangeT=None,rangeD=None):
         '''
         Plot the phase diagram
-        weighting - text string indication weighting technique
-                    TODO: Make this an object instead?
+        weightingType - Text string indication weighting technique
+        rangeT/D      - Temperature/Density ranges (default: choose extents
         '''
-        im = np.rand((self._length,self._length))
+        im = np.random.rand((self._length,self._length))
+        self._MakePlot(im,_MakeWeighting(weightingType))
+        
+    def _MakePlot(self,image,weighting):
+        # Set up figure
+        fig = plt.figure()
+        ax  = fig.add_subplot(111)
+        # Plot the image
+        vmin = np.min(image)
+        vmax = np.max(image)
+        cax = ax.imshow(image, interpolation='nearest',vmin=vmin,vmax=vmax)
+        # Add colour bar
+        cbar = fig.colorbar(cax)
+        cbar.set_label("Density / atoms/cm$^{3}$")
+        plt.savefig("test"+".pdf",format="pdf")
+        
+
+def _SetupWeightings():
+    '''
+    Set up the possible weightings
+    '''
+    ws = dict()
+    ws["mass"] = None # TODO: THIS!!!!
+    return ws
+
+weightingTechniques = _SetupWeightings()
+
+def _MakeWeighting(label):
+    '''
+    Weighting technique factory method 
+    '''
+    return weightingTechniques[label] 
