@@ -7,44 +7,8 @@ Created on Nov 27, 2012
 import numpy as np
 import matplotlib.pyplot as plt
 
+from HistoWeighting import SimpleWeighter, MassWeighter
 
-class SimpleWeighter(object):
-    '''
-    Simple, "default" weighter
-    '''
-    def __init__(self):
-        self._name = "count"
-        self._label = "Count"
-    
-    def Name(self):
-        '''
-        Simple name to use in the code as an ID
-        '''
-        return self._name
-    
-    def Label(self):
-        '''
-        Label to print on plots, etc
-        '''
-        return self._label
-    
-    def Weighting(self, snap):
-        '''
-        Return the weight in a snapshot
-        '''
-        return np.zeros(10000)+1.0 / 10000.0
-    
-    def Temperature(self, snap):
-        '''
-        Snapshot temperature array
-        '''
-        return np.power((np.random.randn(10000)+5.0),10.0)
-    
-    def Density(self, snap):
-        '''
-        Snapshot density array
-        '''
-        return np.power(np.random.randn(10000)+6.0,10.0)  
 
 class PhaseDiagram(object):
     '''
@@ -62,13 +26,13 @@ class PhaseDiagram(object):
         self._length = length
         self._rangeD = None
         self._rangeT = None
-        self._weighter = SimpleWeighter()
+        self._weighter = None
     
     def Plot(self, weightingType=SimpleWeighter(),rangeT=None,rangeD=None):
         '''
         Plot the phase diagram
         weightingType - Text string indication weighting technique
-        rangeT/D      - Temperature/Density ranges (default: choose extents
+        rangeT/D      - Temperature/Density ranges (default: choose extents from data)
         '''
         self._rangeD = rangeD
         self._rangeT = rangeT
@@ -120,7 +84,7 @@ class PhaseDiagram(object):
         # Add colour bar
         cbar = fig.colorbar(cax)
         cbar.set_label("log(% "+self._weighter.Label()+")")
-        plt.savefig("test"+".pdf",format="pdf")
+        plt.savefig("test"+self._weighter.Name()+".pdf",format="pdf")
 
 def _SetupWeightings():
     '''
@@ -136,9 +100,10 @@ def _MakeWeighting(label):
     '''
     Weighting technique factory method 
     '''
-    return weightingTechniques[label] 
-
+    return weightingTechniques[label]
 
 if __name__=="__main__":
     p = PhaseDiagram(None)
-    p.Plot()
+    p.Plot(SimpleWeighter())
+    p = PhaseDiagram(None)
+    p.Plot(MassWeighter())
