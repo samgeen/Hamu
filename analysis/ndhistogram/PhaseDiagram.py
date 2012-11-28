@@ -6,7 +6,45 @@ Created on Nov 27, 2012
 
 import numpy as np
 import matplotlib.pyplot as plt
+
+
+class SimpleWeighter(object):
+    '''
+    Simple, "default" weighter
+    '''
+    def __init__(self):
+        self._name = "count"
+        self._label = "Count"
     
+    def Name(self):
+        '''
+        Simple name to use in the code as an ID
+        '''
+        return self._name
+    
+    def Label(self):
+        '''
+        Label to print on plots, etc
+        '''
+        return self._label
+    
+    def Weighting(self, snap):
+        '''
+        Return the weight in a snapshot
+        '''
+        return np.zeros(10000)+1.0 / 10000.0
+    
+    def Temperature(self, snap):
+        '''
+        Snapshot temperature array
+        '''
+        return np.power((np.random.randn(10000)+5.0),10.0)
+    
+    def Density(self, snap):
+        '''
+        Snapshot density array
+        '''
+        return np.power(np.random.randn(10000)+6.0,10.0)  
 
 class PhaseDiagram(object):
     '''
@@ -24,29 +62,65 @@ class PhaseDiagram(object):
         self._length = length
         self._rangeD = None
         self._rangeT = None
+        self._weighter = SimpleWeighter()
     
-    def Plot(self, weightingType="mass",rangeT=None,rangeD=None):
+    def Plot(self, weightingType=SimpleWeighter(),rangeT=None,rangeD=None):
         '''
         Plot the phase diagram
         weightingType - Text string indication weighting technique
         rangeT/D      - Temperature/Density ranges (default: choose extents
         '''
-        im = np.random.rand((self._length,self._length))
-        self._MakePlot(im,_MakeWeighting(weightingType))
+        self._rangeD = rangeD
+        self._rangeT = rangeT
+        # If the weightingType is a string, parse it into a dictionary object
+        if type(weightingType)==type("THIS IS A STRING"):
+            self._weighter = _MakeWeighting(weightingType)
+        else:
+            self._weighter = weightingType
+        im = self._MakeHisto()
+        self._MakePlot(im)
+    
+    def _MakeHisto(self):
+        im = np.zeros((self._length,self._length))
+        # Set up temperature, density and weightings
+        dataT = np.log10(self._weighter.Temperature(self._snap))
+        dataD = np.log10(self._weighter.Density(self._snap))
+        vW = self._weighter.Weighting(self._snap)
+        # Find the ranges in T and D
+        rT = [np.min(dataT),np.max(dataT)]
+        rD = [np.min(dataD),np.max(dataD)]
+        self._rangeT = rT
+        self._rangeD = rD
+        # Find the data coords in T and D
+        # The 0.99999 makes sure that the values don't overflow the image array bounds
+        cT = (dataT - rT[0]) / (rT[1]-rT[0]) * self._length * 0.99999
+        cD = (dataD - rD[0]) / (rD[1]-rD[0]) * self._length * 0.99999
+        for t,d,w in zip(cT,cD,vW):
+            im[int(d),int(t)]+=w
+        return im
         
-    def _MakePlot(self,image,weighting):
+    def _MakePlot(self,image):
         # Set up figure
         fig = plt.figure()
         ax  = fig.add_subplot(111)
+        # Set the image extents in phase-space
+        ax.set_xlim(self._rangeD)
+        ax.set_ylim(self._rangeT)
+        axes=[self._rangeD[0],self._rangeD[1],self._rangeT[0],self._rangeT[1]]
+        aspect = (axes[1] - axes[0]) / (axes[3] - axes[2])
         # Plot the image
+        image[np.where(image == 0)] = np.min(image[np.nonzero(image)])
+        image = np.log10(image/np.sum(image)*100.0)
         vmin = np.min(image)
         vmax = np.max(image)
-        cax = ax.imshow(image, interpolation='nearest',vmin=vmin,vmax=vmax)
+        cax = ax.imshow(image, interpolation='nearest',extent=axes,vmin=vmin,vmax=vmax,aspect=aspect)
+        # Set axis labels
+        ax.set_xlabel("log(n_{H} / atoms.cm$^{-3}$)")
+        ax.set_ylabel("log(Temperature / K)")
         # Add colour bar
         cbar = fig.colorbar(cax)
-        cbar.set_label("Density / atoms/cm$^{3}$")
+        cbar.set_label("log(% "+self._weighter.Label()+")")
         plt.savefig("test"+".pdf",format="pdf")
-        
 
 def _SetupWeightings():
     '''
@@ -63,3 +137,8 @@ def _MakeWeighting(label):
     Weighting technique factory method 
     '''
     return weightingTechniques[label] 
+
+
+if __name__=="__main__":
+    p = PhaseDiagram(None)
+    p.Plot()
