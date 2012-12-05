@@ -5,7 +5,7 @@ Created on Nov 28, 2012
 '''
 
 import numpy as np
-from shockfront import SnapProfileMax
+from analysis.shockfront.shockfront import SnapProfileMax
 from pymses.utils.regions import Sphere
 from pymses.analysis import sample_points
 from pymses.utils import constants as C
@@ -34,7 +34,8 @@ class HydroSamples(object):
             raise KeyError
         if not var in self._data:
             self._data[var] = sample_points(self._amrs[var], self._points)
-        return self._data[var]
+        # Note: The double [var][var] is because Pymses needs to know the variable type, too
+        return self._data[var][var]
             
     def NumSamples(self):
         return self._numSamples
@@ -50,12 +51,17 @@ class SimpleWeighter(object):
         self._setup = False
         self._data = None
         self._points = None
+        self._numSamples = 1e5
+        self._snap = None
     
     def Name(self):
         '''
         Simple name to use in the code as an ID
         '''
         return self._name
+    
+    def NumSamples(self):
+        return self._numSamples
     
     def _SetupData(self,snap):
         '''
@@ -82,14 +88,16 @@ class SimpleWeighter(object):
         '''
         Return the weight in a snapshot
         '''
-        return np.zeros(self._numSamples)+(1.0 / self._numSamples)
+        self._SetupData(snap)
+        return np.zeros(self._numSamples)+(1.0 / self.NumSamples())
     
     def Temperature(self, snap):
         '''
         Snapshot temperature array
         '''
         self._SetupData(snap)
-        T = self._data["P"] / self._data["rho"] * snap.info["unit_temperature"].express(C.K)
+        T = self._data["P"] / self._data["rho"] \
+                * snap.info["unit_temperature"].express(C.K)
         return T
     
     def Density(self, snap):
@@ -99,12 +107,22 @@ class SimpleWeighter(object):
         self._SetupData(snap)
         D = self._data["rho"] * snap.info["unit_density"].express(C.H_cc)
         return D
+    
+    def Velocity(self, snap):
+        '''
+        Snapshot velocity array
+        '''
+        self._SetupData(snap)
+        D = self._data["vel"] \
+            * snap.info["unit_length"].express(C.cm)/snap.info["unit_time"].express(C.s)
+        return D
 
 class MassWeighter(SimpleWeighter):
     '''
     Weight by mass
     '''
     def __init__(self):
+        SimpleWeighter.__init__(self)
         self._name = "mass"
         self._label = "Mass"
     
@@ -112,5 +130,27 @@ class MassWeighter(SimpleWeighter):
         '''
         Return the weight in a snapshot
         '''
-        self._SetupData(snap)
-        return self.Density(snap) / self._data.NumSamples()
+        dens = self.Density(snap)
+        return dens / np.sum(dens)
+    
+class KEWeighter(SimpleWeighter):
+    '''
+    Weight by kinetic energy fraction
+    '''
+    def __init__(self):
+        SimpleWeighter.__init__(self)
+        self._name = "ke"
+        self._label = "Kinetic Energy Fraction"
+    
+    def Weighting(self, snap):
+        '''
+        Return the weight in a snapshot
+        '''
+        kBcgs = 1.3806488e-16
+        vel = self.Velocity(snap)
+        temp = self.Temperature(snap)
+        # Finds the speed squared by summing over vel*vel in each 3-vector element
+        spdSqrd = np.sum(vel*vel,1) 
+        # Now find the partition of KE / (KE + TE) where TE = (3/2).kB.T and KE = (1/2)|v|^2 
+        partition = 1.0 / (1.0 + (3.0*kBcgs*temp/spdSqrd))
+        return partition / np.sum(partition)

@@ -6,8 +6,9 @@ Created on Nov 27, 2012
 
 import numpy as np
 import matplotlib.pyplot as plt
+import pymses
 
-from HistoWeighting import SimpleWeighter, MassWeighter
+from HistoWeighting import SimpleWeighter, MassWeighter, KEWeighter
 
 
 class PhaseDiagram(object):
@@ -31,7 +32,8 @@ class PhaseDiagram(object):
     def Plot(self, weightingType=SimpleWeighter(),rangeT=None,rangeD=None):
         '''
         Plot the phase diagram
-        weightingType - Text string indication weighting technique
+        weightingType - Text string ind
+    #p = PhaseDiagram(snap)ication weighting technique
         rangeT/D      - Temperature/Density ranges (default: choose extents from data)
         '''
         self._rangeD = rangeD
@@ -57,6 +59,7 @@ class PhaseDiagram(object):
         self._rangeD = rD
         # Find the data coords in T and D
         # The 0.99999 makes sure that the values don't overflow the image array bounds
+        print dataT.shape
         cT = (dataT - rT[0]) / (rT[1]-rT[0]) * self._length * 0.99999
         cD = (dataD - rD[0]) / (rD[1]-rD[0]) * self._length * 0.99999
         for t,d,w in zip(cT,cD,vW):
@@ -79,7 +82,7 @@ class PhaseDiagram(object):
         vmax = np.max(image)
         cax = ax.imshow(image, interpolation='nearest',extent=axes,vmin=vmin,vmax=vmax,aspect=aspect)
         # Set axis labels
-        ax.set_xlabel("log(n_{H} / atoms.cm$^{-3}$)")
+        ax.set_xlabel("log(n$_{H}$ / atoms.cm$^{-3}$)")
         ax.set_ylabel("log(Temperature / K)")
         # Add colour bar
         cbar = fig.colorbar(cax)
@@ -94,6 +97,7 @@ def _SetupWeightings():
     ws["mass"] = None # TODO: THIS!!!!
     return ws
 
+    #p = PhaseDiagram(snap)
 weightingTechniques = _SetupWeightings()
 
 def _MakeWeighting(label):
@@ -103,7 +107,10 @@ def _MakeWeighting(label):
     return weightingTechniques[label]
 
 if __name__=="__main__":
-    p = PhaseDiagram(None)
-    p.Plot(SimpleWeighter())
-    p = PhaseDiagram(None)
+    testloc = "/data/Simulations/SNProject/ResTest/04_lvl8"
+    testout = 234
+    snap = pymses.RamsesOutput(testloc,testout)
+    p = PhaseDiagram(snap)
+    #p.Plot(SimpleWeighter())
     p.Plot(MassWeighter())
+    p.Plot(KEWeighter())
