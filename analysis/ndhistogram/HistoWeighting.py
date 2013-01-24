@@ -8,21 +8,23 @@ import numpy as np
 from analysis.shockfront.shockfront import SnapProfileMax
 from pymses.utils.regions import Sphere
 from pymses.analysis import sample_points
+from pymses.filters import CellsToPoints
 from pymses.utils import constants as C
 
 class HydroSamples(object):
     '''
     Object that preloads and holds hydro data from Pymses to prevent multiple/unnecessary loads
     '''
-    def __init__(self, snap, variables, points, numSamples = 1e6):
+    def __init__(self, snap, variables, numSamples = 1e6):
         self._vars = variables
-        self._points = points
+        #self._points = points
         self._numSamples = numSamples
         # Set up access dictionaries (leave data empty for now; fill on demand)
         self._amrs = dict()
         self._data = dict()
         for var in self._vars:
             self._amrs[var] = snap.amr_source([var])
+        self._vars.append("dx")
         
     def __getitem__(self, var):
         '''
@@ -33,9 +35,13 @@ class HydroSamples(object):
             print "Valid values:", self._vars
             raise KeyError
         if not var in self._data:
-            self._data[var] = sample_points(self._amrs[var], self._points)
+            if var != "dx":
+                #self._data[var] = sample_points(self._amrs[var], self._points)
+                self._data[var] = CellsToPoints(self._amrs[var]).flatten()[var]
+            else:
+                self._data[var] = CellsToPoints(self._amrs["rho"]).flatten().get_sizes()
         # Note: The double [var][var] is because Pymses needs to know the variable type, too
-        return self._data[var][var]
+        return self._data[var]
             
     def NumSamples(self):
         return self._numSamples
@@ -71,11 +77,19 @@ class SimpleWeighter(object):
             # Get random points inside the maximum radius extent
             # NOTE: THIS IS A HUGE HACK DEPENDING ON WHAT YOU'RE PLOTTING A HISTOGRAM OF
             #       ONLY WORKS FOR BOX-CENTRE SPHERICAL SHOCK SIMULATIONS
-            rmax = SnapProfileMax(snap,snap.output_repos)
-            sphere = Sphere([0.5,0.5,0.5],rmax)
-            self._points = sphere.random_points(self._numSamples)
+            #rmax = 2.0*SnapProfileMax(snap,snap.output_repos)
+            #print "Selecting inside a sphere of radius", rmax, "on the grid centre"
+            # SAMPLE POINTS
+            #sphere = Sphere([0.5,0.5,0.5],rmax)
+            #self._points = sphere.random_points(self._numSamples)
+            # GET ALL CELLS
+            
+            # HACK TEST POINT POSITIONS - CAN DELETE THESE 3 LINES
+            #import matplotlib.pyplot as plt
+            #plt.scatter(self._points[:,0],self._points[:,1],)
+            #plt.show()
             # Make a data object for loading the data on demand
-            self._data = HydroSamples(snap,["P","rho","vel"],self._points)
+            self._data = HydroSamples(snap,["P","rho","vel"])#,self._points)
             self._setup = True
     
     def Label(self):
@@ -108,6 +122,20 @@ class SimpleWeighter(object):
         D = self._data["rho"] * snap.info["unit_density"].express(C.H_cc)
         return D
     
+    def CellSize(self, snap):
+        '''
+        Snapshot density array
+        '''
+        self._SetupData(snap)
+        D = self._data["dx"] * snap.info["unit_length"].express(C.cm)
+        return D
+    
+    def CellVol(self, snap):
+        '''
+        Snapshot density array
+        '''
+        return np.power(self.CellSize(snap),3.0)
+    
     def Velocity(self, snap):
         '''
         Snapshot velocity array
@@ -130,8 +158,24 @@ class MassWeighter(SimpleWeighter):
         '''
         Return the weight in a snapshot
         '''
-        dens = self.Density(snap)
-        return dens / np.sum(dens)
+        mass = self.Density(snap)*self.CellVol(snap)
+        return mass / np.sum(mass)
+    
+class VolumeWeighter(SimpleWeighter):
+    '''
+    Weight by mass
+    '''
+    def __init__(self):
+        SimpleWeighter.__init__(self)
+        self._name = "volume"
+        self._label = "Volume"
+    
+    def Weighting(self, snap):
+        '''
+        Return the weight in a snapshot
+        '''
+        weight = self.CellVol(snap)
+        return weight / np.sum(weight)
     
 class KEWeighter(SimpleWeighter):
     '''
