@@ -2,7 +2,7 @@
 # Sam Geen, March 2012
 
 import Hamu
-from SimData.Simulation import Simulation
+from Hamu.SimData.Simulation import Simulation
 import shockfront
 import matplotlib.pyplot as plt
 

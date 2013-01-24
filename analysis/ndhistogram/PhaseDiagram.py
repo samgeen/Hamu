@@ -6,15 +6,15 @@ Created on Nov 27, 2012
 
 import numpy as np
 import matplotlib.pyplot as plt
+import pymses
 
-from HistoWeighting import SimpleWeighter, MassWeighter
+from HistoWeighting import SimpleWeighter, MassWeighter, KEWeighter, VolumeWeighter
 
 
 class PhaseDiagram(object):
     '''
     A phase diagram in temperature and density, with selectable weighting methods
     '''
-
 
     def __init__(self, snap, length=128):
         '''
@@ -31,7 +31,7 @@ class PhaseDiagram(object):
     def Plot(self, weightingType=SimpleWeighter(),rangeT=None,rangeD=None):
         '''
         Plot the phase diagram
-        weightingType - Text string indication weighting technique
+        weightingType - Text string indicating weighting technique
         rangeT/D      - Temperature/Density ranges (default: choose extents from data)
         '''
         self._rangeD = rangeD
@@ -45,11 +45,12 @@ class PhaseDiagram(object):
         self._MakePlot(im)
     
     def _MakeHisto(self):
+        # Make the histogram image array
         im = np.zeros((self._length,self._length))
         # Set up temperature, density and weightings
         dataT = np.log10(self._weighter.Temperature(self._snap))
         dataD = np.log10(self._weighter.Density(self._snap))
-        vW = self._weighter.Weighting(self._snap)
+        weightings = self._weighter.Weighting(self._snap)
         # Find the ranges in T and D
         rT = [np.min(dataT),np.max(dataT)]
         rD = [np.min(dataD),np.max(dataD)]
@@ -57,12 +58,15 @@ class PhaseDiagram(object):
         self._rangeD = rD
         # Find the data coords in T and D
         # The 0.99999 makes sure that the values don't overflow the image array bounds
+        print dataT.shape
         cT = (dataT - rT[0]) / (rT[1]-rT[0]) * self._length * 0.99999
         cD = (dataD - rD[0]) / (rD[1]-rD[0]) * self._length * 0.99999
-        for t,d,w in zip(cT,cD,vW):
-            im[int(d),int(t)]+=w
+        for t,d,w in zip(cT,cD,weightings):
+            # NOTE1 - NUMPY ARRAYS SEEM TO DO COLUMN THEN ROW, SO Y = 1ST ELEMENT, X = 2ND
+            # NOTE2 - IMAGES SEEM TO HAVE ZERO AT THE TOP, RATHER THAN THE BOTTOM, SO T NEEDS FLIPPING
+            im[self._length-int(t)-1,int(d)]+=w 
         return im
-        
+    
     def _MakePlot(self,image):
         # Set up figure
         fig = plt.figure()
@@ -79,12 +83,12 @@ class PhaseDiagram(object):
         vmax = np.max(image)
         cax = ax.imshow(image, interpolation='nearest',extent=axes,vmin=vmin,vmax=vmax,aspect=aspect)
         # Set axis labels
-        ax.set_xlabel("log(n_{H} / atoms.cm$^{-3}$)")
+        ax.set_xlabel("log(n$_{H}$ / atoms.cm$^{-3}$)")
         ax.set_ylabel("log(Temperature / K)")
         # Add colour bar
         cbar = fig.colorbar(cax)
         cbar.set_label("log(% "+self._weighter.Label()+")")
-        plt.savefig("test"+self._weighter.Name()+".pdf",format="pdf")
+        plt.savefig("test"+self._weighter.Name()+str(self._snap.iout)+".pdf",format="pdf")
 
 def _SetupWeightings():
     '''
@@ -94,16 +98,19 @@ def _SetupWeightings():
     ws["mass"] = None # TODO: THIS!!!!
     return ws
 
-weightingTechniques = _SetupWeightings()
-
 def _MakeWeighting(label):
     '''
     Weighting technique factory method 
     '''
-    return weightingTechniques[label]
+    return _SetupWeightings()[label]
 
 if __name__=="__main__":
-    p = PhaseDiagram(None)
-    p.Plot(SimpleWeighter())
-    p = PhaseDiagram(None)
+    testloc = "/data/Simulations/SNProject/Jan2013/01_Thornton/03_windcoolsn"
+    testout = 80
+    snap = pymses.RamsesOutput(testloc,testout)
+    p = PhaseDiagram(snap)
+    #p.Plot(SimpleWeighter())
     p.Plot(MassWeighter())
+    p.Plot(VolumeWeighter())
+    #p.Plot(KEWeighter())
+    print "Done!"

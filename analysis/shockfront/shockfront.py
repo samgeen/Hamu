@@ -1,8 +1,8 @@
 # Measure the shockfront from a list of profiles
 # Sam Geen, February 2012
 
-from Simulation import Simulation
-import profiles
+from Hamu.SimData.Simulation import Simulation
+from analysis.profiles import profiles
 import os
 import numpy
 import matplotlib.pyplot as plt
@@ -30,7 +30,7 @@ def SnapProfileMax(snap,location,alwaysbigger=False,allabovebackground=False,rfl
                   (prevents reverse shock from being used)
     allabovebackground: If True, use all the points above the background density
     '''
-    prof = profiles.ReadPickle("pressure",snap,location+"/")
+    prof = profiles.ReadPickle("pressure",snap.iout,location+"/")
     r = prof.radius
     p = prof.profile
     # Set a floor on radius
