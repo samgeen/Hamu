@@ -5,7 +5,7 @@ Created on Nov 28, 2012
 '''
 
 import numpy as np
-from analysis.shockfront.shockfront import SnapProfileMax
+#from analysis.shockfront.shockfront import SnapProfileMax
 from pymses.utils.regions import Sphere
 from pymses.analysis import sample_points
 from pymses.filters import CellsToPoints

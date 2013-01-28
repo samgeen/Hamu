@@ -4,11 +4,14 @@ Created on Nov 27, 2012
 @author: samgeen
 '''
 
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 import pymses
 
 from HistoWeighting import SimpleWeighter, MassWeighter, KEWeighter, VolumeWeighter
+
+from SimData.Simulation import Simulation
 
 
 class PhaseDiagram(object):
@@ -34,6 +37,7 @@ class PhaseDiagram(object):
         weightingType - Text string indicating weighting technique
         rangeT/D      - Temperature/Density ranges (default: choose extents from data)
         '''
+        
         self._rangeD = rangeD
         self._rangeT = rangeT
         # If the weightingType is a string, parse it into a dictionary object
@@ -41,8 +45,19 @@ class PhaseDiagram(object):
             self._weighter = _MakeWeighting(weightingType)
         else:
             self._weighter = weightingType
-        im = self._MakeHisto()
-        self._MakePlot(im)
+        
+        # Set up file name
+        os.system("mkdir phases")
+        outnum = '%(num)05d' % {'num': self._snap.iout}
+        fileout = "phases/phase"+self._weighter.Name()+outnum+".pdf"
+        # Only run if the file doesn't already exist
+        try:
+            f = open(fileout)
+            f.close()
+            print fileout, "exists; skipping..."
+        except:
+            im = self._MakeHisto()
+            self._MakePlot(im, fileout)
     
     def _MakeHisto(self):
         # Make the histogram image array
@@ -67,7 +82,7 @@ class PhaseDiagram(object):
             im[self._length-int(t)-1,int(d)]+=w 
         return im
     
-    def _MakePlot(self,image):
+    def _MakePlot(self,image,fileout):
         # Set up figure
         fig = plt.figure()
         ax  = fig.add_subplot(111)
@@ -88,7 +103,7 @@ class PhaseDiagram(object):
         # Add colour bar
         cbar = fig.colorbar(cax)
         cbar.set_label("log(% "+self._weighter.Label()+")")
-        plt.savefig("test"+self._weighter.Name()+str(self._snap.iout)+".pdf",format="pdf")
+        plt.savefig(fileout,format="pdf")
 
 def _SetupWeightings():
     '''
@@ -105,12 +120,15 @@ def _MakeWeighting(label):
     return _SetupWeightings()[label]
 
 if __name__=="__main__":
-    testloc = "/data/Simulations/SNProject/Jan2013/01_Thornton/03_windcoolsn"
-    testout = 80
-    snap = pymses.RamsesOutput(testloc,testout)
-    p = PhaseDiagram(snap)
-    #p.Plot(SimpleWeighter())
-    p.Plot(MassWeighter())
-    p.Plot(VolumeWeighter())
-    #p.Plot(KEWeighter())
+    loc = "./"
+    sim = Simulation(loc)
+    for out in sim.Outputs():
+        if out > 1:
+            print out
+            snap = pymses.RamsesOutput(loc,out)
+            p = PhaseDiagram(snap)
+            #p.Plot(SimpleWeighter())
+            p.Plot(MassWeighter())
+            p.Plot(VolumeWeighter())
+            p.Plot(KEWeighter())
     print "Done!"

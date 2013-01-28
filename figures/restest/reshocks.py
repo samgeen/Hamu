@@ -1,24 +1,26 @@
 # Resolution test shock front comparison
 # Sam Geen, March 2012
 
-import Hamu
-from SimData.Simulation import Simulation
-import shockfront
+from Hamu.Hamu import Hamu # OK I need to change this
+from Hamu.SimData.Simulation import Simulation
+from analysis.shockfront import shockfront
 import totalenergy
 import matplotlib.pyplot as plt
 
 def run(mode="shock"):
     # Simulations to use
-    top = "/home/samgeen/SN_Project/runs/ResTest/02_ThorntonCentred/"
-    sims = list()
-#    sims.append("/home/samgeen/SN_Project/runs/Production/09_Thornton_corner_hllc_c0p5/03_windcoolsn")
-    sims.append(top+"01_lvl10")
-    sims.append(top+"02_lvl9")
-    sims.append(top+"04_lvl8")
-#    sims.append(top+"03_lvl10_resim")
-    names = ["10 levels","9 levels","8 levels"]
+    #top = "/home/samgeen/SN_Project/runs/ResTest/02_ThorntonCentred/"
+    #sims = list()
+    #sims.append(top+"01_lvl10")
+    #sims.append(top+"02_lvl9")
+    #sims.append(top+"04_lvl8")
+    #names = ["10 levels","9 levels","8 levels"]
+    # NEW SIMULATIONS
+    top = "/home/samgeen/SN_Project/runs/Jan2013/01_Thornton/"
+    sims = [top+"03_windsncool",top+"H3_windcoolsn_HIRES"]
+    names=["13 levels","14 levels"]
     # Make suite
-    hamu = Hamu.Hamu(".")
+    hamu = Hamu(".")
     suite = hamu.MakeSuite("hybridtest")
     for i in range(0,len(names)):
         sim = sims[i]
@@ -28,11 +30,14 @@ def run(mode="shock"):
     for sim in suite:
         names.append(sim.Name())
     
+    # ONLY CHECK CENTRAL 1/16!
+    scale = 1.0/16.0
+
     # Run shockfront for each sim
     graphs = list()
     if mode == "shock":
         for sim in suite:
-            graphs.append(shockfront.ShockGraph(sim))
+            graphs.append(shockfront.ShockGraph(sim,scale=scale))
         outname = "shockfront"
     elif mode == "totalenergy":
         for sim in suite:

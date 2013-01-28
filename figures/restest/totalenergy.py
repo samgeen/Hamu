@@ -1,8 +1,8 @@
 # Measure the total energy in the system to compare resolutions
 # Sam Geen, February 2012
 
-from Simulation import Simulation
-import profiles
+from Hamu.SimData.Simulation import Simulation
+import analysis.profiles
 import os
 import numpy
 import matplotlib.pyplot as plt

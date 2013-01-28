@@ -16,7 +16,7 @@ def ProfileMax(sim,alwaysbigger=False,allabovebackground=False):
     rmax = -1
     #print len(sim.Outputs())
     rfloor = 0.
-    for out in sim.Outputs():
+    for out in sim:
         rmax = SnapProfileMax(out,sim.Location(),alwaysbigger,allabovebackground,rfloor)
         if alwaysbigger:
             rfloor = 0.5*rmax
