@@ -13,36 +13,42 @@ corner = False
 
 # Structure for storing pickle data
 class Pickle(object):
-    def __init__(self,radius,profile,hydroname,xtitle,ytitle):
+    def __init__(self,radius,profile,hydroname,xtitle,ytitle,scale):
         self.radius = radius
         self.profile = profile
         self.xtitle = xtitle
         self.ytitle = ytitle
+        self.scale = scale
 
-def ReadPickle(hydroname, outnum,folder="./"):
-    filename = Prefile(hydroname,outnum,False,folder)+".pik"
+def ReadPickle(hydroname, outnum,folder="./",scale=1.0):
+    filename = Prefile(hydroname,outnum,False,folder,scale)+".pik"
     # Write profile if it doesn't exist
+    print scale
     if not os.path.isfile(filename):
-        prof(outnum,hydroname,folder)
+        prof(outnum,hydroname,folder,scale=scale)
     file   = open(filename,"rb")
     r      = pik.load(file)
     p      = pik.load(file)
     xtitle = pik.load(file)
     ytitle = pik.load(file)
+    scale = pik.load(file)
     file.close()
-    return Pickle(r,p,hydroname,xtitle,ytitle)
+    return Pickle(r,p,hydroname,xtitle,ytitle,scale)
 
 # File prefix
-def Prefile(hydroname,outnum,makefolder=False,folder="./"):
+def Prefile(hydroname,outnum,makefolder=False,folder="./",scale=1.0):
+    scalestr = ""
+    if scale != 1.0:
+        scalestr = str(scale).replace(".","p")
     folder += "/profiles_"+hydroname+"/"
     if not os.path.isdir(folder):
         os.system("mkdir "+folder)
-    prefile = folder+"profile_"+str(outnum)+"_"+hydroname
+    prefile = folder+"profile_"+str(outnum)+"_"+hydroname+scalestr
     return prefile
 
 # This is oh so hacky, if you're using this and your name isn't Sam Geen 
 #                                                      THEN GOD HELP YOOOUUU
-def prof(outnum=100,name="mach",snaplocation="./"):
+def prof(outnum=100,name="mach",snaplocation="./",scale=1.0):
     # Print location we're saving to
     print "Saving to: ", Prefile(name,outnum,False,snaplocation)
     # Open output
@@ -52,7 +58,7 @@ def prof(outnum=100,name="mach",snaplocation="./"):
     pmaker = ProfileMaker(snap)
     # Set profile region
     centre = [0.5,0.5,0.5]
-    radius = 0.5
+    radius = 0.5*scale
     ylog = True
     if corner==True:
         centre = [0.0,0.0,0.0]
@@ -135,13 +141,14 @@ def prof(outnum=100,name="mach",snaplocation="./"):
     plt.ylabel(ytitle)
     plot = plt.plot(r,prof)
     # Save pickle file
-    prefile = Prefile(name,outnum,True,snaplocation)
+    prefile = Prefile(name,outnum,True,snaplocation,scale)
     file = open(prefile+".pik","wb")
     print "Exporting as pickle..."
     pik.dump(r,file)
     pik.dump(prof,file)
     pik.dump(xtitle,file)
     pik.dump(ytitle,file)
+    pik.dump(scale,file)
     file.close()
     # Save pdf
     print "Saving profile to",prefile+".pdf"

@@ -1,8 +1,8 @@
-# Measure the total energy in the system to compare resolutions
+ # Measure the total energy in the system to compare resolutions
 # Sam Geen, February 2012
 
 from Hamu.SimData.Simulation import Simulation
-import analysis.profiles
+import Hamu.analysis.profiles.profiles as profiles
 import os
 import numpy
 import matplotlib.pyplot as plt
@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 # alwaysbigger: If True, the shock radius should always be bigger than the last 
 #               (prevents reverse shock from being used)
 # allabovebackground: If True, use all the points above the background density
-def ProfileTotal(sim,alwaysbigger=False,allabovebackground=False):
+def ProfileTotal(sim,alwaysbigger=False,allabovebackground=False,scale=1.0):
     values = list()
     rmax = -1
     #print len(sim.Outputs())
@@ -26,7 +26,8 @@ def ProfileTotal(sim,alwaysbigger=False,allabovebackground=False):
         hydros = ["density","temperature","velocity_radial",\
               "velocity_turbulent"]
         for hydro in hydros:
-            profs[hydro] = profiles.ReadPickle(hydro,out,sim.Location()+"/")
+            profs[hydro] = profiles.ReadPickle(hydro,out,\
+                                               sim.Location()+"/",scale=scale)
         r = profs["density"].radius
         d = profs["density"].profile
         t = profs["temperature"].profile
@@ -42,12 +43,12 @@ def ProfileTotal(sim,alwaysbigger=False,allabovebackground=False):
         values.append(energy)
     return values
 
-def TotalEnergyGraph(sim,allabovebackground=False,alwaysbigger=True):
+def TotalEnergyGraph(sim,allabovebackground=False,alwaysbigger=True,scale=1.0):
     print "Processing simulation",sim.Location()
     # Run through the simulation, finding the highest pressure peak
     times = list()
     # Get radii
-    values = ProfileTotal(sim,alwaysbigger,allabovebackground)
+    values = ProfileTotal(sim,alwaysbigger,allabovebackground,scale)
     # Get times
     i = 1
     for snap in sim:
@@ -61,7 +62,7 @@ def run(folder="."):
     # Open a simulation in a folder
     sim = Simulation(folder)
     # Find the radii for the shock front and times in each output
-    radii, times = TotalEnergyGraph(sim)
+    radii, times = TotalEnergyGraph(sim,scale=1.0)
     # Plototot
     plt.figure()
     xtitle = "Time / Myr"

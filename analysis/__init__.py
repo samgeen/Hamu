@@ -6,3 +6,4 @@ Created on Dec 5, 2012
 
 import profiles
 import shockfront
+import visualisation

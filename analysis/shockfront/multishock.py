@@ -1,7 +1,6 @@
 # Multiple shock front test
 # Sam Geen, March 2012
 
-import Hamu
 from Hamu.SimData.Simulation import Simulation
 import shockfront
 import matplotlib.pyplot as plt

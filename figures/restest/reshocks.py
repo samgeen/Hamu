@@ -1,9 +1,9 @@
 # Resolution test shock front comparison
 # Sam Geen, March 2012
 
-from Hamu.Hamu import Hamu # OK I need to change this
+from Hamu.Workspace import Workspace
 from Hamu.SimData.Simulation import Simulation
-from analysis.shockfront import shockfront
+from Hamu.analysis.shockfront import shockfront
 import totalenergy
 import matplotlib.pyplot as plt
 
@@ -17,10 +17,11 @@ def run(mode="shock"):
     #names = ["10 levels","9 levels","8 levels"]
     # NEW SIMULATIONS
     top = "/home/samgeen/SN_Project/runs/Jan2013/01_Thornton/"
-    sims = [top+"03_windsncool",top+"H3_windcoolsn_HIRES"]
+    #sims = [top+"03_windsncool",top+"H3_windcoolsn_HIRES"]
+    sims = [top+"03_windsncool",top+"F3_windkintest"]
     names=["13 levels","14 levels"]
     # Make suite
-    hamu = Hamu(".")
+    hamu = Workspace(".")
     suite = hamu.MakeSuite("hybridtest")
     for i in range(0,len(names)):
         sim = sims[i]
@@ -41,7 +42,7 @@ def run(mode="shock"):
         outname = "shockfront"
     elif mode == "totalenergy":
         for sim in suite:
-            graphs.append(totalenergy.TotalEnergyGraph(sim))
+            graphs.append(totalenergy.TotalEnergyGraph(sim,scale=scale))
         outname = "totalenergy"
 
     # PLOT

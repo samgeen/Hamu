@@ -7,7 +7,7 @@ import pymses
 from pymses.analysis.visualization import Camera, SliceMap, ScalarOperator
 import pylab
 import cPickle as pik
-from SimData.Simulation import Simulation
+from Hamu.SimData.Simulation import Simulation
 from copy import copy
 
 corner=True

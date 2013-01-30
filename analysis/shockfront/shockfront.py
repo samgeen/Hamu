@@ -2,7 +2,7 @@
 # Sam Geen, February 2012
 
 from Hamu.SimData.Simulation import Simulation
-from analysis.profiles import profiles
+from Hamu.analysis.profiles import profiles
 import os
 import numpy
 import matplotlib.pyplot as plt
@@ -11,26 +11,26 @@ import matplotlib.pyplot as plt
 # alwaysbigger: If True, the shock radius should always be bigger than the last 
 #               (prevents reverse shock from being used)
 # allabovebackground: If True, use all the points above the background density
-def ProfileMax(sim,alwaysbigger=False,allabovebackground=False):
+def ProfileMax(sim,alwaysbigger=False,allabovebackground=False,scale=1.0):
     radii = list()
     rmax = -1
     #print len(sim.Outputs())
     rfloor = 0.
     for out in sim:
-        rmax = SnapProfileMax(out,sim.Location(),alwaysbigger,allabovebackground,rfloor)
+        rmax = SnapProfileMax(out,sim.Location(),alwaysbigger,allabovebackground,rfloor,scale)
         if alwaysbigger:
             rfloor = 0.5*rmax
         radii.append(rmax)
     return radii
 
-def SnapProfileMax(snap,location,alwaysbigger=False,allabovebackground=False,rfloor=0.0):
+def SnapProfileMax(snap,location,alwaysbigger=False,allabovebackground=False,rfloor=0.0,scale=1.0):
     '''
     Find the max value in the profile for one snapshot
     alwaysbigger: If True, the shock radius should always be bigger than the last 
                   (prevents reverse shock from being used)
     allabovebackground: If True, use all the points above the background density
     '''
-    prof = profiles.ReadPickle("pressure",snap.iout,location+"/")
+    prof = profiles.ReadPickle("pressure",snap.iout,location+"/",scale=scale)
     r = prof.radius
     p = prof.profile
     # Set a floor on radius
@@ -54,7 +54,7 @@ def SnapProfileMax(snap,location,alwaysbigger=False,allabovebackground=False,rfl
     # Use every point above the background density?
     if allabovebackground:
         # Get background density
-        init = profiles.ReadPickle("density",1,location+"/")
+        init = profiles.ReadPickle("density",1,location+"/",scale)
         bckg = numpy.max(init.profile[1:len(init.profile)])
         cp = pr > bckg # add a floor to ignore noise in background
         if len(rr[cp]) > 0:
@@ -65,12 +65,12 @@ def SnapProfileMax(snap,location,alwaysbigger=False,allabovebackground=False,rfl
         rfloor = 0.5*rmax
     return rmax
         
-def ShockGraph(sim,allabovebackground=False,alwaysbigger=True):
+def ShockGraph(sim,allabovebackground=False,alwaysbigger=True,scale=1.0):
     print "Processing simulation",sim.Location()
     # Run through the simulation, finding the highest pressure peak
     times = list()
     # Get radii
-    radii = ProfileMax(sim,alwaysbigger,allabovebackground)
+    radii = ProfileMax(sim,alwaysbigger,allabovebackground,scale)
     # Get times
     i = 1
     for snap in sim:
