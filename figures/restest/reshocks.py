@@ -16,9 +16,9 @@ def run(mode="shock"):
     #sims.append(top+"04_lvl8")
     #names = ["10 levels","9 levels","8 levels"]
     # NEW SIMULATIONS
-    top = "/home/samgeen/SN_Project/runs/Jan2013/01_Thornton/"
+    top = "/home/samgeen/SN_Project/runs/Jan2013/03_n30_T100_Zsolar/"
     #sims = [top+"03_windsncool",top+"H3_windcoolsn_HIRES"]
-    sims = [top+"03_windsncool",top+"F3_windkintest"]
+    sims = [top+"05_windrtsncool",top+"H5_full_hires"]
     names=["13 levels","14 levels"]
     # Make suite
     hamu = Workspace(".")
