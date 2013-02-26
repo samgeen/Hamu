@@ -1,122 +1,142 @@
-# A simulation class, used to iterate through outputs
-# Sam Geen, March 2012
+'''
+Created on 15 Feb 2013
 
-import numpy as np
-import subprocess
-import pymses
-import os
+@author: samgeen
+'''
 
-# Very simple factory method
-def Make(name,location=""):
-    return Simulation(name,location)
+import os, re, collections, importlib
+import cPickle as pik
 
-# Simulation class
-class Simulation(object):
-    def __init__(self,name,location="."):
+from Utils.Directory import Directory
+import Settings
+import Simulations
+import HamuIterable
+
+class Simulation(HamuIterable.HamuIterable):
+    '''
+    A simulation object; stores snapshots
+    NOTE: CURRENTLY IT DOES NOT SAVE SNAPSHOTS - INSTEAD, IT RE-LOADS THEM EVERY TIME THE SIMULATION IS INSTANTIATED
+          DO WE WANT A MORE NUANCED APPROACH TO THIS - E.G. IF SNAPSHOTS ARE DELETED BUT WE STILL WANT TO ANALYSE THE DATA?
+    '''
+
+    def __init__(self,name,path=None,codeModule=None):
+        '''
+        Constructor
+        name: Name of the simulation (to be used to refer to the simulation from here on)
+        path: Path of raw simulation data - NOTE: MUST BE INCLUDED THE FIRST TIME A SIMULATION IS USED BY HAMU
+        codeModule: Python module used to generate simulation data for a given code - NOTE: AS ABOVE
+        '''
         self._name = name
-        self._location = location
-        self._outputs = list()
-        self._snapshots = dict()
-        self._times = list()
-        self._itercount = -1
-        self._prepared = False
-
-    # Simulation location
-    def Location(self):
-        return self._location
-    
-    # Simulation name
+        self._path = path
+        self._codeModule = codeModule
+        self._cachedir = None
+        self._snapshots = collections.OrderedDict()
+        self._Setup()
+        
     def Name(self):
+        '''
+        Returns the name of the simulation
+        '''
         return self._name
     
-    # outputNumber: integer output number
-    def __getitem__(self, outputNumber):
-        self._Prepare()
-        # Find the output number by key
-        # TODO: Add exceptions if the output number given is bad?
+    def Path(self):
+        '''
+        Returns the path of the raw simulation data
+        '''
+        return self._path
+    
+    def CodeModule(self):
+        '''
+        Returns the code module used to generate the raw simulation data
+        '''
+        return self._codeModule
+    
+    def Snapshot(self, outputNumber):
+        '''
+        Returns a snapshot with a given output number
+        '''
         return self._snapshots[outputNumber]
-
-    # Return list of outputs
-    def Outputs(self):
-        self._Prepare()
-        return self._outputs
     
-    # Return the list of output times
-    def Times(self):
-        self._Prepare()
-        return self._times
-
-    # Iterator stuff
-    def __iter__(self):
-        self._itercount = -1
-        self._Prepare() 
-        return self 
-
-    def next(self):
-        self._itercount += 1
-        if self._itercount == len(self._outputs):
-            raise StopIteration
-        # This is a little convoluted, but it keeps outputs in order.
-        return self._snapshots[self._outputs[self._itercount]]
+    def Snapshots(self):
+        '''
+        Returns a list of all snapshots in the simulation
+        '''
+        return self._snapshots.values() # Note: values() gets a list from the OrderedDict
     
-    # Find a snapshot at a given time
-    # TODO: Refactor a bit, this code works but is a bit messy
-    # TODO: Pass out the % error somehow as something other than text
-    def FindAtTime(self, time):
-        self._Prepare()
-        # Find the snapshot time with the minimum difference to the required time
-        times = np.array(self._times)
-        diff = np.abs(times - time)
-        best = np.where(diff == np.min(diff))
-        best = self._outputs[best[0][0]]
-        pdiff = (times[best-1]-time) / time * 100.0
-        snap = self._snapshots[best]
-        print "Found match with output",best,", %diff: ",pdiff, "at time ",times[best-1]
-        return snap
-    
-    def Folders(self):
-        # Find a list of folder locations
-        self._Prepare()
-        folders = list()
-        for nout in self._outputs:
-            folders.append(self._Outfolder(nout))
-        return folders
-
-    # PROTECTED AUXILIARY METHODS
-
-    # Locate all the outputs, general simulatin preparation
-    def _Prepare(self):
-        if not self._prepared:
-            print "Preparing simulation for reading... ",
-            # Run through all the outputs
-            self._outputs = list()
-            for nout in self._FindOutNums():
-                snap = pymses.RamsesOutput(self._location, nout)
-                # Add to the containers
-                self._outputs.append(nout)
-                self._times.append(snap.info["time"])
-                self._snapshots[nout] = snap
-            print "Done!"
-            self._prepared = True
-
-    # Find a list of output folders in the simulation folder
-    def _FindOutNums(self):
-        # Find a list of outputs as a text list
-        outs = subprocess.check_output("ls -d "+self.Location()+"/output_*",shell=True)
-        # Process the list into a set of output numbers
-        nums = list()
-        outs = outs.split("\n")
-        for out in outs:
-            if len(out) > 0:
-                # This finds the last 5 characters (the output number) and casts them to an int
-                nums.append( int(out[len(out)-5:]) )
-        # Sort the array and return the results
-        nums = sorted(nums)
-        return nums
-
-    # Output folder name from output number  
-    def _Outfolder(self, nout):
-        outstr = '%(num)05d' % {'num': nout}
-        return self.Location()+"/output_"+outstr
-
-
+    def _Setup(self):
+        '''
+        Runs when the object is created
+        '''
+        sims = Simulations.Simulations()
+        # Check to see if the simulation exists
+        if not sims.Exists(self._name):
+            # Create it!
+            # First, check that we've been given enough data to work with
+            if not self._codeModule or not self._path:
+                print "Error: No code/path inputted into non-existent simulation with name", self._name
+                print "       Current workspace:", Settings.Settings()["CurrentWorkspace"]
+                raise ValueError
+            # Add self to list of cached simulations
+            self._cachedir = sims.AddSimulation(self)
+        else:
+            # Load the simulation cache data
+            self._cachedir = sims.CachePath(self.Name())
+            self._Load()
+        # Locate all the snapshots in the raw data folder
+        self._UpdateSnapshots()
+        self._Save()
+                
+            
+    def _UpdateSnapshots(self):
+        '''
+        Find the snapshots inside the raw data folder and update the snapshots list
+        '''
+        stub = self._codeModule.OutputStub(self._path)
+        items = Directory(self._path).ListItems()
+        self._snapshots.clear()
+        for item in items:
+            # Does the item match an output?
+            if stub in item:
+                # Strip out the item's digits and find the output number
+                num = int(re.sub("\D", "", item))
+                snap = self._codeModule.MakeSnapshot(self._path,num)
+                snap.SetupCache(self._cachedir)
+                # Add the snapshot to the array
+                self._snapshots[num] = snap
+                
+    def _Save(self):
+        '''
+        Save the data to a pickle file
+        '''
+        filename = self._CacheFilename()
+        pikfile = open(filename,"wb")
+        pik.dump(self._name,pikfile)
+        pik.dump(self._path,pikfile)
+        pik.dump(self._codeModule.__name__,pikfile)
+        pik.dump(self._cachedir,pikfile)
+        #pik.dump(self._snapshots,pikfile)
+        pikfile.close()
+        
+    def _Load(self):
+        '''
+        Load the data from the pickle file
+        '''
+        filename = self._CacheFilename()
+        if os.path.exists(filename):
+            pikfile = open(filename,"rb")
+            self._name = pik.load(pikfile)
+            self._path = pik.load(pikfile)
+            codeModuleName = pik.load(pikfile)
+            self._cachedir = pik.load(pikfile)
+            #self._snapshots = pik.load(pikfile)
+            pikfile.close()
+            self._codeModule = importlib.import_module(codeModuleName)
+            
+    def _CacheFilename(self):
+        '''
+        Returns the name of the cache file
+        '''
+        return self._cachedir+"Simulation"+self._name+".cache"
+            
+            
+        
