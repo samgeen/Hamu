@@ -2,11 +2,10 @@
 # Sam Geen, March 2012
 
 import Hamu
-from SimData.Simulation import Simulation
-import profiles
+from Hamu.SimData.Simulation import Simulation
+from Hamu import profiles
 import matplotlib.pyplot as plt
 import numpy as np
-import findoutput
 import matplotlib.image as mpimg
 
 # Plot a single image with axes and everything

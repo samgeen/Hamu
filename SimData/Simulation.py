@@ -7,10 +7,18 @@ Created on 15 Feb 2013
 import os, re, collections, importlib
 import cPickle as pik
 
-from Utils.Directory import Directory
+from Hamu.Utils.Directory import Directory
 import Settings
 import Simulations
 import HamuIterable
+
+
+
+def __call__(name,path=None,codeModule=None):
+    '''
+    Convenience factory method; allows users to call the module to instantiate a new object
+    '''
+    return Simulation(name,path,codeModule)
 
 class Simulation(HamuIterable.HamuIterable):
     '''

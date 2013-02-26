@@ -12,7 +12,15 @@ import Workspace
 import Simulation
 import Simulations
 import HamuIterable
-from Utils.Directory import Directory
+from Hamu.Utils.Directory import Directory
+
+
+
+def __call__(name):
+    '''
+    Convenience factory method; allows users to call the module to instantiate a new object
+    '''
+    return Project(name)
 
 class Project(HamuIterable.HamuIterable):
     '''

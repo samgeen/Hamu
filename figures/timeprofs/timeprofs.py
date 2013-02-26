@@ -1,15 +1,14 @@
 # Graphs of quantities over time in the system
 # Sam Geen, March 2012
 
-import Hamu
-from SimData.Simulation import Simulation
-import profiles
+#import Hamu
+from Hamu.SimData.Simulation import Simulation
+from Hamu import profiles
 import matplotlib.pyplot as plt
 import numpy as np
-import findoutput
 import os
-import plotslice
-import shockfront
+import Hamu.analysis.visualisation.plotslice as plotslice
+import Hamu.analysis.shockfront.shockfront as shockfront
 
 profiles.corner = False
 
@@ -345,13 +344,17 @@ def run(wind=False):
                 corners.append(True)
                 boxlens.append(200.0)
 
+    # Simulations
+    for sim in sims:
+        print sim
+
     # Run radial profiles
     onlysn = not wind
     for sim, name, corner, boxlen in zip(sims, names, corners,boxlens):
         print "Plotting for run", name
         print "Folder:", sim
         print "Run in corner?", str(corner)
-        plotter = Times(Simulation(sim),name,corner,boxlen,onlysn)
+        plotter = Times(Simulation(name, sim),name,corner,boxlen,onlysn)
         plotter.Run()
 
 if __name__=="__main__":

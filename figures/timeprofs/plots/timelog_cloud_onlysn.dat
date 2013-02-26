@@ -1,0 +1,6 @@
+log: Mass / Msolar, etherm, ekin, eturb, etot / erg, radius / pc, time / yr
+5.2294671738 51.2854359201 50.1795619785 46.3600158021 51.3182019887 1.47566388932 5.93416307943
+fraction: etherm, ekin, eturb / etot, eturb/ekin
+0.927329191861 0.0726708081391 1.10106716935e-05 0.000151514369738
+time-radius power law fit:0.389022474779 * x + -0.83285041522
+time-mass power law fit:1.16480270943 * x + -1.68602994461

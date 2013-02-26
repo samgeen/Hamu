@@ -7,8 +7,11 @@ Created on 18 Feb 2013
 import abc
 
 import Settings
-from Utils.Directory import Directory
+from Hamu.Utils.Directory import Directory
 from HamuIterable import HamuIterable
+
+# NOTE: THIS IS AN ABSTRACT CLASS; YOU CAN'T INSTANTIATE IT
+#       CHECK THE Codes FOLDER FOR CONCRETE CLASSES OF THIS TYPE
 
 class Snapshot(HamuIterable):
     '''

@@ -1,0 +1,6 @@
+log: Mass / Msolar, etherm, ekin, eturb, etot / erg, radius / pc, time / yr
+nan nan nan nan nan -inf 6.76915245377
+fraction: etherm, ekin, eturb / etot, eturb/ekin
+nan nan nan nan
+time-radius power law fit:0.285381887023 * x + -0.489854608576
+time-mass power law fit:nan * x + nan

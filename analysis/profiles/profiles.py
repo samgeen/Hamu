@@ -31,7 +31,7 @@ def ReadPickle(hydroname, outnum,folder="./",scale=1.0):
     p      = pik.load(file)
     xtitle = pik.load(file)
     ytitle = pik.load(file)
-    scale = pik.load(file)
+    #scale = pik.load(file)
     file.close()
     return Pickle(r,p,hydroname,xtitle,ytitle,scale)
 

@@ -7,7 +7,7 @@ Functions and classes that implement Hamu for Ramses data
 '''
 
 import pymses, sys, StringIO
-from SimData.Snapshot import Snapshot
+from Hamu import Snapshot
 
 def MakeSnapshot(folder, outputNumber):
     '''

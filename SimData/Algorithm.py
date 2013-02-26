@@ -9,6 +9,12 @@ import hashlib
 import cPickle as pik
 import os
 
+def __call__(function, *args, **kwargs):
+    '''
+    Convenience factory method; allows users to call the module to instantiate a new object
+    '''
+    return Algorithm(function, *args, **kwargs)
+
 class CacheFile(object):
     def __init__(self, snapshot, algorithm):
         self._snapshot = snapshot
