@@ -12,7 +12,7 @@ import Settings
 import Simulations
 import HamuIterable
 
-
+import numpy as np
 
 def __call__(name,path=None,codeModule=None):
     '''
@@ -71,6 +71,24 @@ class Simulation(HamuIterable.HamuIterable):
         '''
         return self._snapshots.values() # Note: values() gets a list from the OrderedDict
     
+    def FindAtTime(self, time):
+        '''
+        Returns the snapshot at the given time
+        '''
+        # Find the snapshot time with the minimum difference to the required time
+        times = list()
+        for snap in self._snapshots.itervalues():
+            times.append(snap.Time())
+        times = np.array(times)
+        diff = np.abs(times - time)
+        best = np.where(diff == np.min(diff))
+        #best = self._outputs[best[0][0]]
+        best = best[0][0]
+        pdiff = (times[best-1]-time) / time * 100.0
+        snap = self._snapshots.values()[best]
+        print "Found match with output",snap.OutputNumber(),", %diff: ",pdiff, "at time ",snap.Time()
+        return snap
+
     def _Setup(self):
         '''
         Runs when the object is created

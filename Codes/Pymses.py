@@ -40,7 +40,10 @@ class PymsesSnapshot(Snapshot):
         # Run constructor
         self._snapshot = pymses.RamsesOutput(folder,outputNumber)
         # Reset stdout
-        sys.stdout = actualstdout
+        sys.stdout = actualstdout        
+        # Add self to this object to allow tracking back up and using Algorithm 
+        self._snapshot.hamusnap = self
+
 
     # ### IMPLEMENTATION OF ABSTRACT FUNCTIONS FOUND IN Snapshot ###
         
@@ -62,7 +65,7 @@ class PymsesSnapshot(Snapshot):
         Return the output time (for comparing outputs)
         TODO: Make this concept more concrete (i.e. make sure units/measurement methods match)
         '''
-        return self._snapshot.info["Time"]
+        return self._snapshot.info["time"]
     
     def Path(self):
         '''

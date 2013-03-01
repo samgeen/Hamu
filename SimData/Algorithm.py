@@ -35,7 +35,7 @@ class CacheFile(object):
         # Load the (binary) data file
         if self.Exists():
             pikfile = open(self._Filename("data"),"rb")
-            print self._Filename("data")
+            print "Loading from cache..."#self._Filename("data")
             output = pik.load(pikfile)
             pikfile.close()
             return output
@@ -46,7 +46,7 @@ class CacheFile(object):
         '''
         Does the cache file exist?
         '''
-        return os.path.exists(self._algorithm.CacheFilename())
+        return os.path.exists(self._Filename())
         
     def _Filename(self,ext="data"):
         '''
@@ -69,10 +69,12 @@ class Algorithm(object):
         self._args = args
         self._kwargs = kwargs
         
-    def Run(self, snap):
+    def Run(self, snap, *args, **kwargs):
         '''
         Run for a single snapshot
         '''
+        self._args = args
+        self._kwargs = kwargs
         # First, get the cache filename and compare against existing files
         cache = CacheFile(snap, self)
         # Check to see if a cached dataset exists
@@ -104,11 +106,11 @@ class Algorithm(object):
         out += "\n"
         return out
     
-    def __call__(self, snapshot):
+    def __call__(self, snapshot, *args, **kwargs):
         '''
         Allows the algorithm to be called like a function
         '''
-        return self.Run(snapshot)
+        return self.Run(snapshot, *args, **kwargs)
     
     def CacheFilename(self, ext="data"):
         '''
