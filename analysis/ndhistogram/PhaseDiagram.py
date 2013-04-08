@@ -8,38 +8,93 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 import pymses
+import Hamu
 
 from HistoWeighting import SimpleWeighter, MassWeighter, KEWeighter, VolumeWeighter
 
-from SimData.Simulation import Simulation
+def _SetupWeightings():
+    '''
+    Set up the possible weightings
+    '''
+    ws = dict()
+    ws["count"] = SimpleWeighter()
+    ws["mass"] = MassWeighter()
+    ws["ke"] = KEWeighter()
+    ws["volume"] = VolumeWeighter()
+    return ws
 
+def _MakeWeighting(label):
+    '''
+    Weighting technique factory method 
+    '''
+    return _SetupWeightings()[label]
+
+def MakeHisto(snap, length, weighterName, rT, rD):
+    '''
+    Make the histogram image array
+    (Made separate from PhaseDiagram to make Hamu implementation easier to understand)
+    '''
+    weighter = _MakeWeighting(weighterName)
+    im = np.zeros((length,length))
+    # Set up temperature, density and weightings
+    dataT = np.log10(weighter.Temperature(snap))
+    dataD = np.log10(weighter.Density(snap))
+    weightings = weighter.Weighting(snap)
+    # Find the ranges in T and D
+    if not rT:
+        rT = [np.min(dataT),np.max(dataT)]
+    if not rD:
+        rD = [np.min(dataD),np.max(dataD)]
+    # Find the data coords in T and D
+    # The 0.99999 makes sure that the values don't overflow the image array bounds
+    print dataT.shape
+    cT = (dataT - rT[0]) / (rT[1]-rT[0]) * length * 0.99999
+    cD = (dataD - rD[0]) / (rD[1]-rD[0]) * length * 0.99999
+
+    # Cull values that lie outside the data range
+    im = np.histogram2d(dataT,dataD,(length,length),\
+                           range=[rT,rD],weights=weightings)
+
+    # Flip image to match plotting
+    #im = np.fliplr(im)
+
+    '''
+    for t,d,w in zip(cT,cD,weightings):
+        # NOTE1 - NUMPY ARRAYS SEEM TO DO COLUMN THEN ROW, SO Y = 1ST ELEMENT, X = 2ND
+        # NOTE2 - IMAGES SEEM TO HAVE ZERO AT THE TOP, RATHER THAN THE BOTTOM, SO T NEEDS FLIPPING
+        
+        #im[length-int(t)-1,int(d)]+=w 
+        t = length-int(t)-1
+        d = int(d)
+        #if t >= 0 and t < length and d >= 0 and d < length:
+        im[t,d]+=w 
+    '''
+    return (rD, rT, im)
 
 class PhaseDiagram(object):
     '''
     A phase diagram in temperature and density, with selectable weighting methods
     '''
 
-    def __init__(self, snap, length=128):
+    def __init__(self, snap, length=128,rangeT=None,rangeD=None):
         '''
         Constructor
-        snap - Pymses RamsesOutput snapshot object
+        snap - Hamu snapshot object
         length - Number of pixels in density and temperature space
-        '''
+        rangeT/D - Temperature/Density ranges 
+                   (default: choose extents from data)
+       '''
         self._snap = snap
         self._length = length
-        self._rangeD = None
-        self._rangeT = None
+        self._rangeT = rangeT
+        self._rangeD = rangeD
         self._weighter = None
     
-    def Plot(self, weightingType=SimpleWeighter(),rangeT=None,rangeD=None):
+    def PlotPhase(self, weightingType=SimpleWeighter()):
         '''
         Plot the phase diagram
         weightingType - Text string indicating weighting technique
-        rangeT/D      - Temperature/Density ranges (default: choose extents from data)
-        '''
-        
-        self._rangeD = rangeD
-        self._rangeT = rangeT
+         '''
         # If the weightingType is a string, parse it into a dictionary object
         if type(weightingType)==type("THIS IS A STRING"):
             self._weighter = _MakeWeighting(weightingType)
@@ -48,39 +103,14 @@ class PhaseDiagram(object):
         
         # Set up file name
         os.system("mkdir phases")
-        outnum = '%(num)05d' % {'num': self._snap.iout}
-        fileout = "phases/phase"+self._weighter.Name()+outnum+".pdf"
+        outnum = '%(num)05d' % {'num': self._snap.OutputNumber()}
+        fileout = "plots/phases/phase"+self._weighter.Name()+outnum+".pdf"
         # Only run if the file doesn't already exist
-        try:
-            f = open(fileout)
-            f.close()
-            print fileout, "exists; skipping..."
-        except:
-            im = self._MakeHisto()
-            self._MakePlot(im, fileout)
-    
-    def _MakeHisto(self):
-        # Make the histogram image array
-        im = np.zeros((self._length,self._length))
-        # Set up temperature, density and weightings
-        dataT = np.log10(self._weighter.Temperature(self._snap))
-        dataD = np.log10(self._weighter.Density(self._snap))
-        weightings = self._weighter.Weighting(self._snap)
-        # Find the ranges in T and D
-        rT = [np.min(dataT),np.max(dataT)]
-        rD = [np.min(dataD),np.max(dataD)]
-        self._rangeT = rT
-        self._rangeD = rD
-        # Find the data coords in T and D
-        # The 0.99999 makes sure that the values don't overflow the image array bounds
-        print dataT.shape
-        cT = (dataT - rT[0]) / (rT[1]-rT[0]) * self._length * 0.99999
-        cD = (dataD - rD[0]) / (rD[1]-rD[0]) * self._length * 0.99999
-        for t,d,w in zip(cT,cD,weightings):
-            # NOTE1 - NUMPY ARRAYS SEEM TO DO COLUMN THEN ROW, SO Y = 1ST ELEMENT, X = 2ND
-            # NOTE2 - IMAGES SEEM TO HAVE ZERO AT THE TOP, RATHER THAN THE BOTTOM, SO T NEEDS FLIPPING
-            im[self._length-int(t)-1,int(d)]+=w 
-        return im
+        MakeHistoPlot = Hamu.Algorithm(MakeHisto)
+        self._rangeD, self._rangeT, im = MakeHistoPlot(self._snap, self._length, self._weighter.Name(), self._rangeT, self._rangeD)
+        im, blah, blah = im # since np.histogram2d returns a tuple
+        im = np.flipud(im)
+        self._MakePlot(im, fileout)
     
     def _MakePlot(self,image,fileout):
         # Set up figure
@@ -105,23 +135,9 @@ class PhaseDiagram(object):
         cbar.set_label("log(% "+self._weighter.Label()+")")
         plt.savefig(fileout,format="pdf")
 
-def _SetupWeightings():
-    '''
-    Set up the possible weightings
-    '''
-    ws = dict()
-    ws["mass"] = None # TODO: THIS!!!!
-    return ws
-
-def _MakeWeighting(label):
-    '''
-    Weighting technique factory method 
-    '''
-    return _SetupWeightings()[label]
-
 if __name__=="__main__":
     loc = "./"
-    sim = Simulation(loc)
+    sim = Hamu.Simulation(loc)
     for out in sim.Outputs():
         if out > 1:
             print out
