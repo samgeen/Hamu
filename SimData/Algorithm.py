@@ -35,7 +35,8 @@ class CacheFile(object):
         # Load the (binary) data file
         if self.Exists():
             pikfile = open(self._Filename("data"),"rb")
-            print "Loading from cache..."#self._Filename("data")
+            print "Loading from cache: snap", self._snapshot.OutputNumber(),\
+                self._algorithm.FunctionName(), "..."
             output = pik.load(pikfile)
             pikfile.close()
             return output
@@ -68,6 +69,12 @@ class Algorithm(object):
         self._function = function
         self._args = args
         self._kwargs = kwargs
+
+    def FunctionName(self):
+        '''
+        Return the function's name
+        '''
+        return self._function.__name__
         
     def Run(self, snap, *args, **kwargs):
         '''
