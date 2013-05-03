@@ -7,7 +7,7 @@ Functions and classes that implement Hamu for Ramses data
 '''
 
 import pymses, sys, StringIO
-from Hamu import Snapshot
+import Hamu.Snapshot
 
 def MakeSnapshot(folder, outputNumber):
     '''
@@ -27,9 +27,9 @@ def OutputStub(folder):
     '''
     return "output_"
 
-class PymsesSnapshot(Snapshot):
+class PymsesSnapshot(Hamu.Snapshot):
     def __init__(self, folder, outputNumber):
-        Snapshot.__init__(self)
+        Hamu.Snapshot.__init__(self)
         '''
         folder: The folder containing the data
         output: The number of the snapshot/output

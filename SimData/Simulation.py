@@ -14,12 +14,6 @@ import HamuIterable
 
 import numpy as np
 
-def __call__(name,path=None,codeModule=None):
-    '''
-    Convenience factory method; allows users to call the module to instantiate a new object
-    '''
-    return Simulation(name,path,codeModule)
-
 class Simulation(HamuIterable.HamuIterable):
     '''
     A simulation object; stores snapshots
@@ -63,13 +57,13 @@ class Simulation(HamuIterable.HamuIterable):
         '''
         Returns a snapshot with a given output number
         '''
-        return self._snapshots[outputNumber]
+        return self._SnapshotDict()[outputNumber]
     
     def Snapshots(self):
         '''
         Returns a list of all snapshots in the simulation
         '''
-        return self._snapshots.values() # Note: values() gets a list from the OrderedDict
+        return self._SnapshotDict().values() # Note: values() gets a list from the OrderedDict
     
     def FindAtTime(self, time):
         '''
@@ -77,7 +71,8 @@ class Simulation(HamuIterable.HamuIterable):
         '''
         # Find the snapshot time with the minimum difference to the required time
         times = list()
-        for snap in self._snapshots.itervalues():
+        snaps = self._SnapshotDict()
+        for snap in snaps.itervalues():
             times.append(snap.Time())
         times = np.array(times)
         diff = np.abs(times - time)
@@ -85,9 +80,18 @@ class Simulation(HamuIterable.HamuIterable):
         #best = self._outputs[best[0][0]]
         best = best[0][0]
         pdiff = (times[best-1]-time) / time * 100.0
-        snap = self._snapshots.values()[best]
+        snap = snaps.values()[best]
         print "Found match with output",snap.OutputNumber(),", %diff: ",pdiff, "at time ",snap.Time()
         return snap
+    
+    def _SnapshotDict(self):
+        '''
+        Makes sure that the snapshots are read, and returns them
+        '''
+        if len(self._snapshots) == 0:
+        # Locate all the snapshots in the raw data folder
+            self._UpdateSnapshots()
+        return self._snapshots
 
     def _Setup(self):
         '''
@@ -108,8 +112,7 @@ class Simulation(HamuIterable.HamuIterable):
             # Load the simulation cache data
             self._cachedir = sims.CachePath(self.Name())
             self._Load()
-        # Locate all the snapshots in the raw data folder
-        self._UpdateSnapshots()
+        # NOTE: SNAPSHOTS UPDATED ON REQUEST NOW TO MAKE THINGS FASTER
         self._Save()
                 
             
@@ -119,7 +122,8 @@ class Simulation(HamuIterable.HamuIterable):
         '''
         stub = self._codeModule.OutputStub(self._path)
         items = Directory(self._path).ListItems()
-        self._snapshots.clear()
+        snaps = self._SnapshotDict()
+        snaps.clear()
         for item in items:
             # Does the item match an output?
             if stub in item:
@@ -128,7 +132,7 @@ class Simulation(HamuIterable.HamuIterable):
                 snap = self._codeModule.MakeSnapshot(self._path,num)
                 snap.SetupCache(self._cachedir)
                 # Add the snapshot to the array
-                self._snapshots[num] = snap
+                snaps[num] = snap
                 
     def _Save(self):
         '''
@@ -140,7 +144,6 @@ class Simulation(HamuIterable.HamuIterable):
         pik.dump(self._path,pikfile)
         pik.dump(self._codeModule.__name__,pikfile)
         pik.dump(self._cachedir,pikfile)
-        #pik.dump(self._snapshots,pikfile)
         pikfile.close()
         
     def _Load(self):
@@ -154,7 +157,6 @@ class Simulation(HamuIterable.HamuIterable):
             self._path = pik.load(pikfile)
             codeModuleName = pik.load(pikfile)
             self._cachedir = pik.load(pikfile)
-            #self._snapshots = pik.load(pikfile)
             pikfile.close()
             self._codeModule = importlib.import_module(codeModuleName)
             
