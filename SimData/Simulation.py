@@ -84,11 +84,12 @@ class Simulation(HamuIterable.HamuIterable):
         print "Found match with output",snap.OutputNumber(),", %diff: ",pdiff, "at time ",snap.Time()
         return snap
     
-    def _SnapshotDict(self):
+    def _SnapshotDict(self, update=True):
         '''
         Makes sure that the snapshots are read, and returns them
         '''
-        if len(self._snapshots) == 0:
+        # If we have no snapshots here, update (unless told not to!)
+        if len(self._snapshots) == 0 and update:
         # Locate all the snapshots in the raw data folder
             self._UpdateSnapshots()
         return self._snapshots
@@ -122,7 +123,7 @@ class Simulation(HamuIterable.HamuIterable):
         '''
         stub = self._codeModule.OutputStub(self._path)
         items = Directory(self._path).ListItems()
-        snaps = self._SnapshotDict()
+        snaps = self._SnapshotDict(update=False)
         snaps.clear()
         for item in items:
             # Does the item match an output?
