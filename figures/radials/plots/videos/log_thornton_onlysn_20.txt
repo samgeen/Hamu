@@ -1,4 +1,0 @@
-simname: thornton_onlysn_20
-actual time of output: 14.335yr
-output number: 20
-original data at: /home/samgeen/SN_Project/runs/Production/09_Thornton_corner_hllc_c0p5/02_coolsn/
