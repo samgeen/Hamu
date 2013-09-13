@@ -77,7 +77,7 @@ class Project(HamuIterable.HamuIterable):
             snaps += sim.Snapshots()
         return snaps
         
-    def AddSimulation(self, simulation):
+    def Add(self, simulation):
         '''
         Add a simulation to the project
         simulation: Can be either a Simulation object or a string containing a simulation name
@@ -88,16 +88,29 @@ class Project(HamuIterable.HamuIterable):
             name = simulation.Name()
         else:
             name = simulation
-        #else:
-        #    print "Error: Input value to Project.AddSimuation() neither a string nor a Simulation object"
-        #    print "       Object of type:",type(simulation)
-        #    raise ValueError
         # Add simulation to the project (NOTE: ONLY SAVES THE NAMES)
         if not name in self._simnames:
             self._simnames.append(name)
         # Save the simulations already in the project
         self._Save()
         
+    def Remove(self, simulation):
+        '''
+        Remove a simulation from the project
+        simulation: Can be either a Simulation object or a string containing a simulation name
+        '''
+        # Find the name of the simulation (depending on whether we're inputting the name or the simulation)
+        name = None
+        if type(simulation) != type(""):
+            name = simulation.Name()
+        else:
+            name = simulation
+        # Add simulation to the project (NOTE: ONLY SAVES THE NAMES)
+        if name in self._simnames:
+            self._simnames.remove(name)
+        # Save the simulations already in the project
+        self._Save()
+
     def _CacheFilename(self):
         return self._dir.Path()+"Project"+self._name+".cache"
         
