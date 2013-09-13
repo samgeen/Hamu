@@ -58,6 +58,12 @@ class Project(HamuIterable.HamuIterable):
         '''
         return Simulation.Simulation(name, path, codeModule)
         
+    def SimNames(self):
+        '''
+        Return a list of simulation *names* in the project
+        '''
+        return self._simnames
+
     def Simulations(self):
         '''
         Return a list of simulations in the project
