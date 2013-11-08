@@ -23,7 +23,7 @@ if __name__ == '__main__':
     # Open a simulation
     simpath = "/data/Simulations/Disk/Runs/lvl7"
     sim = Simulation("TestSimulation",simpath, Pymses)
-    # Add the simulation to the project
+    # Add the simulation to the 
     project.AddSimulation(sim)
     # Find a snapshot and print its output number
     snap = sim.Snapshot(6)
