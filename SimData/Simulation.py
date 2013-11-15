@@ -21,7 +21,7 @@ class Simulation(HamuIterable.HamuIterable):
           DO WE WANT A MORE NUANCED APPROACH TO THIS - E.G. IF SNAPSHOTS ARE DELETED BUT WE STILL WANT TO ANALYSE THE DATA?
     '''
 
-    def __init__(self,name,path=None,codeModule=None):
+    def __init__(self,name,path=None,codeModule=None,label=None):
         '''
         Constructor
         name: Name of the simulation (to be used to refer to the simulation from here on)
@@ -33,6 +33,10 @@ class Simulation(HamuIterable.HamuIterable):
         self._codeModule = codeModule
         self._cachedir = None
         self._snapshots = collections.OrderedDict()
+        # Set label
+        self._label = name
+        self.Label(label)
+        # Run setup routine to ensure simulation is properly set up
         self._Setup()
         
     def Name(self):
@@ -40,6 +44,17 @@ class Simulation(HamuIterable.HamuIterable):
         Returns the name of the simulation
         '''
         return self._name
+    
+    def Label(self, newLabel=None):
+        '''
+        Returns a label to use for legends, etc (can be a longer string with spaces if needed)
+        newLabel: If set, change the label to this value
+        Default label is the same as self._name
+        '''
+        if type(newLabel) == type("thisisastring"):
+            self._label = newLabel
+            self._Save()
+        return self._label
     
     def Path(self):
         '''
@@ -79,7 +94,7 @@ class Simulation(HamuIterable.HamuIterable):
         best = np.where(diff == np.min(diff))
         #best = self._outputs[best[0][0]]
         best = best[0][0]
-        pdiff = (times[best-1]-time) / time * 100.0
+        pdiff = (times[best-1]-time) / time * 100.0 # Is a percentage, so multiply by 100
         snap = snaps.values()[best]
         print "Found match with output",snap.OutputNumber(),", %diff: ",pdiff, "at time ",snap.Time()
         return snap
@@ -145,6 +160,7 @@ class Simulation(HamuIterable.HamuIterable):
         pik.dump(self._path,pikfile)
         pik.dump(self._codeModule.__name__,pikfile)
         pik.dump(self._cachedir,pikfile)
+        pik.dump(self._label,pikfile)
         pikfile.close()
         
     def _Load(self):
@@ -158,6 +174,10 @@ class Simulation(HamuIterable.HamuIterable):
             self._path = pik.load(pikfile)
             codeModuleName = pik.load(pikfile)
             self._cachedir = pik.load(pikfile)
+            try:
+                self._label = pik.load(pikfile)
+            except:
+                self._label = self._name
             pikfile.close()
             self._codeModule = importlib.import_module(codeModuleName)
             
