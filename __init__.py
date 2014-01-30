@@ -20,6 +20,9 @@ from SimData.MakeSim import MakePymses
 #from analysis.profiles import profiles
 
 def ListSimulations():
+    '''
+    Print a list of all simulation names in the current workspace
+    '''
     import os
     import SimData.Simulations
     sims = SimData.Simulations.Simulations()
