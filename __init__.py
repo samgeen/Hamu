@@ -18,3 +18,10 @@ from SimData.MakeSim import MakePymses
 # CONVENIENCE IMPORTS; BRINGS SLICES AND PROFILES UP THE CHAIN OF MODULES
 #from analysis.visualisation import slices
 #from analysis.profiles import profiles
+
+def ListSimulations():
+    import os
+    import SimData.Simulations
+    sims = SimData.Simulations.Simulations()
+    path = sims.CachePath()
+    os.system("ls "+path)
