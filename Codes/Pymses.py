@@ -6,8 +6,11 @@ Created on 20 Feb 2013
 Functions and classes that implement Hamu for Ramses data
 '''
 
-import pymses, sys, StringIO, Hamu
+import pymses, os, sys, StringIO, Hamu
 import Hamu.SimData.Snapshot as Snapshot
+
+def MakeSimulation(name, folder=os.getcwd()):
+    return Hamu.Simulation(name,folder,sys.modules[__name__])
 
 def MakeSnapshot(folder, outputNumber):
     '''

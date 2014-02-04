@@ -7,8 +7,11 @@ Functions and classes that implement Hamu for YT snapshots
 NOTE: FUNCTION OutputStub ONLY WORKS WITH RAMSES OUTPUTS SO FAR!!!
 '''
 
-import yt.mods, sys, StringIO, Hamu
+import yt.mods, os, sys, StringIO, Hamu
 import Hamu.SimData.Snapshot as Snapshot
+
+def MakeSimulation(name, folder=os.getcwd()):
+    return Hamu.Simulation(name,folder,sys.modules[__name__])
 
 def MakeSnapshot(folder, outputNumber):
     '''
