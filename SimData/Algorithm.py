@@ -9,12 +9,6 @@ import hashlib
 import cPickle as pik
 import os
 
-def __call__(function, *args, **kwargs):
-    '''
-    Convenience factory method; allows users to call the module to instantiate a new object
-    '''
-    return Algorithm(function, *args, **kwargs)
-
 class CacheFile(object):
     def __init__(self, snapshot, algorithm):
         self._snapshot = snapshot
@@ -91,6 +85,17 @@ class Algorithm(object):
             output = self._RunAlgorithm(snap)
             cache.Save(output)
         return output
+
+    def Cached(self, snap, *args, **kwargs):
+        '''
+        Check that the cache for this data exists
+        '''
+        self._args = args
+        self._kwargs = kwargs
+        # First, get the cache filename and compare against existing files
+        cache = CacheFile(snap, self)
+        # Check to see if a cached dataset exists
+        return cache.Exists()
         
     def _RunAlgorithm(self, snapshot):
         '''
