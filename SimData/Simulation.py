@@ -170,10 +170,14 @@ class Simulation(HamuIterable.HamuIterable):
         filename = self._CacheFilename()
         if os.path.exists(filename):
             pikfile = open(filename,"rb")
-            self._name = pik.load(pikfile)
-            self._path = pik.load(pikfile)
-            codeModuleName = pik.load(pikfile)
-            self._cachedir = pik.load(pikfile)
+            try:
+                self._name = pik.load(pikfile)
+                self._path = pik.load(pikfile)
+                codeModuleName = pik.load(pikfile)
+                self._cachedir = pik.load(pikfile)
+            except:
+                print "Error loading cache for simulation ", self.Name()
+                raise
             try:
                 self._label = pik.load(pikfile)
             except:
