@@ -84,7 +84,7 @@ class Simulation(HamuIterable.HamuIterable):
         '''
         Returns a list of all the snapshot times
         '''
-        return [snap.Time() for snap in self.Snapshots()]
+        return np.array([snap.Time() for snap in self.Snapshots()])
 
     def FindAtTime(self, time):
         '''
