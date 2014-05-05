@@ -80,6 +80,12 @@ class Simulation(HamuIterable.HamuIterable):
         '''
         return self._SnapshotDict().values() # Note: values() gets a list from the OrderedDict
     
+    def Times(self):
+        '''
+        Returns a list of all the snapshot times
+        '''
+        return [snap.Time() for snap in self.Snapshots()]
+
     def FindAtTime(self, time):
         '''
         Returns the snapshot at the given time
