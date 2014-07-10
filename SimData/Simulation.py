@@ -21,7 +21,7 @@ class Simulation(HamuIterable.HamuIterable):
           DO WE WANT A MORE NUANCED APPROACH TO THIS - E.G. IF SNAPSHOTS ARE DELETED BUT WE STILL WANT TO ANALYSE THE DATA?
     '''
 
-    def __init__(self,name,path=None,codeModule=None,label=None):
+    def __init__(self,name,path=None,codeModule=None,label=None,forceSetup=False):
         '''
         Constructor
         name: Name of the simulation (to be used to refer to the simulation from here on)
@@ -39,6 +39,8 @@ class Simulation(HamuIterable.HamuIterable):
         # Run setup routine to ensure simulation is properly set up
         #self._Setup()
         self._setup = False
+        if forceSetup:
+            self._Setup()
         
     def Name(self):
         '''
