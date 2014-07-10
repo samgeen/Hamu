@@ -11,7 +11,7 @@ import os, sys, StringIO, Hamu
 import Hamu.SimData.Snapshot as Snapshot
 
 def MakeSimulation(name, folder=os.getcwd()):
-    return Hamu.Simulation(name,folder,sys.modules[__name__])
+    return Hamu.Simulation(name,folder,sys.modules[__name__],forceSetup=True)
 
 def MakeSnapshot(folder, outputNumber):
     '''
