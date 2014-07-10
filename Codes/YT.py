@@ -7,7 +7,7 @@ Functions and classes that implement Hamu for YT snapshots
 NOTE: FUNCTION OutputStub ONLY WORKS WITH RAMSES OUTPUTS SO FAR!!!
 '''
 
-import yt.mods, os, sys, StringIO, Hamu
+import os, sys, StringIO, Hamu
 import Hamu.SimData.Snapshot as Snapshot
 
 def MakeSimulation(name, folder=os.getcwd()):
@@ -47,6 +47,7 @@ class YTSnapshot(Snapshot.Snapshot):
         # HACK - ONLY WORKS FOR RAMSES OUTPUTS!!
         ramnum = str(outputNumber).zfill(5)
         ramname = folder+"/output_"+ramnum+"/info_"+ramnum+".txt"
+        import yt.mods # Do this here as YT insists on running code in the __init__ file
         self._snapshot = yt.mods.load(ramname)
         # Reset stdout
         sys.stdout = actualstdout        

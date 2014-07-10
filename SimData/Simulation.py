@@ -37,7 +37,8 @@ class Simulation(HamuIterable.HamuIterable):
         self._label = name
         self.Label(label)
         # Run setup routine to ensure simulation is properly set up
-        self._Setup()
+        #self._Setup()
+        self._setup = False
         
     def Name(self):
         '''
@@ -72,18 +73,21 @@ class Simulation(HamuIterable.HamuIterable):
         '''
         Returns a snapshot with a given output number
         '''
+        self._Setup()
         return self._SnapshotDict()[outputNumber]
     
     def Snapshots(self):
         '''
         Returns a list of all snapshots in the simulation
         '''
+        self._Setup()
         return self._SnapshotDict().values() # Note: values() gets a list from the OrderedDict
     
     def Times(self):
         '''
         Returns a list of all the snapshot times
         '''
+        self._Setup()
         return np.array([snap.Time() for snap in self.Snapshots()])
 
     def FindAtTime(self, time):
@@ -91,6 +95,7 @@ class Simulation(HamuIterable.HamuIterable):
         Returns the snapshot at the given time
         '''
         # Find the snapshot time with the minimum difference to the required time
+        self._Setup()
         times = list()
         snaps = self._SnapshotDict()
         for snap in snaps.itervalues():
@@ -109,6 +114,7 @@ class Simulation(HamuIterable.HamuIterable):
         '''
         Makes sure that the snapshots are read, and returns them
         '''
+        self._Setup()
         # If we have no snapshots here, update (unless told not to!)
         if len(self._snapshots) == 0 and update:
         # Locate all the snapshots in the raw data folder
@@ -119,6 +125,9 @@ class Simulation(HamuIterable.HamuIterable):
         '''
         Runs when the object is created
         '''
+        # Have we already set up?
+        if self._setup:
+            return
         sims = Simulations.Simulations()
         # Check to see if the simulation exists
         if not sims.Exists(self._name):
@@ -133,15 +142,17 @@ class Simulation(HamuIterable.HamuIterable):
         else:
             # Load the simulation cache data
             self._cachedir = sims.CachePath(self.Name())
-            self._Load()
+            self._Load(nosetup=True)
         # NOTE: SNAPSHOTS UPDATED ON REQUEST NOW TO MAKE THINGS FASTER
-        self._Save()
+        self._Save(nosetup=True)
+        self._setup = True
                 
             
     def _UpdateSnapshots(self):
         '''
         Find the snapshots inside the raw data folder and update the snapshots list
         '''
+        self._Setup()
         stub = self._codeModule.OutputStub(self._path)
         items = Directory(self._path).ListItems()
         snaps = self._SnapshotDict(update=False)
@@ -156,10 +167,12 @@ class Simulation(HamuIterable.HamuIterable):
                 # Add the snapshot to the array
                 snaps[num] = snap
                 
-    def _Save(self):
+    def _Save(self,nosetup=False):
         '''
         Save the data to a pickle file
         '''
+        if not nosetup:
+            self._Setup()
         filename = self._CacheFilename()
         pikfile = open(filename,"wb")
         pik.dump(self._name,pikfile)
@@ -169,10 +182,12 @@ class Simulation(HamuIterable.HamuIterable):
         pik.dump(self._label,pikfile)
         pikfile.close()
         
-    def _Load(self):
+    def _Load(self,nosetup=False):
         '''
         Load the data from the pickle file
         '''
+        if not nosetup:
+            self._Setup()
         filename = self._CacheFilename()
         if os.path.exists(filename):
             pikfile = open(filename,"rb")

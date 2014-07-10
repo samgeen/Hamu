@@ -6,7 +6,7 @@ Created on 20 Feb 2013
 Functions and classes that implement Hamu for Ramses data
 '''
 
-import pymses, os, sys, StringIO, Hamu
+import os, sys, StringIO, Hamu
 import Hamu.SimData.Snapshot as Snapshot
 
 def MakeSimulation(name, folder=os.getcwd()):
@@ -41,6 +41,7 @@ class PymsesSnapshot(Snapshot.Snapshot):
         actualstdout = sys.stdout
         sys.stdout = StringIO.StringIO()
         # Run constructor
+        import pymses # Do this here in case pymses runs code in __init__
         self._snapshot = pymses.RamsesOutput(folder,outputNumber)
         # Reset stdout
         sys.stdout = actualstdout        
