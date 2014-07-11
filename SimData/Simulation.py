@@ -55,8 +55,8 @@ class Simulation(HamuIterable.HamuIterable):
         Default label is the same as self._name
         '''
         if type(newLabel) == type("thisisastring"):
-            self._label = newLabel
             self._Setup()
+            self._label = newLabel
             self._Save()
         return self._label
     
