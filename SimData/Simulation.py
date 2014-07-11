@@ -35,7 +35,7 @@ class Simulation(HamuIterable.HamuIterable):
         self._snapshots = collections.OrderedDict()
         # Set label
         self._label = name
-        self.Label(label)
+        # self.Label(label) <- TODO CHECK THAT THIS LINE ISN'T NEEDED
         # Run setup routine to ensure simulation is properly set up
         #self._Setup()
         self._setup = False
@@ -54,8 +54,8 @@ class Simulation(HamuIterable.HamuIterable):
         newLabel: If set, change the label to this value
         Default label is the same as self._name
         '''
+        self._Setup()
         if type(newLabel) == type("thisisastring"):
-            self._Setup()
             self._label = newLabel
             self._Save()
         return self._label
