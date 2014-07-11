@@ -56,6 +56,7 @@ class Simulation(HamuIterable.HamuIterable):
         '''
         if type(newLabel) == type("thisisastring"):
             self._label = newLabel
+            self._Setup()
             self._Save()
         return self._label
     
