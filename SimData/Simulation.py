@@ -64,12 +64,14 @@ class Simulation(HamuIterable.HamuIterable):
         '''
         Returns the path of the raw simulation data
         '''
+        self._Setup()
         return self._path
     
     def CodeModule(self):
         '''
         Returns the code module used to generate the raw simulation data
         '''
+        self._Setup()
         return self._codeModule
     
     def Snapshot(self, outputNumber):
@@ -101,16 +103,17 @@ class Simulation(HamuIterable.HamuIterable):
         self._Setup()
         times = list()
         snaps = self._SnapshotDict()
-        for snap in snaps.itervalues():
-            times.append(snap.Time())
-        times = np.array(times)
+        #for snap in snaps.itervalues():
+        #    times.append(snap.Time())
+        #times = np.array(times)
+        times = np.array(self.Times())
         diff = np.abs(times - time)
         best = np.where(diff == np.min(diff))
         #best = self._outputs[best[0][0]]
         best = best[0][0]
         pdiff = (times[best-1]-time) / time * 100.0 # Is a percentage, so multiply by 100
         snap = snaps.values()[best]
-        print "Found match with output",snap.OutputNumber(),", %diff: ",pdiff, "at time ",snap.Time()
+        print "Found match with output",snap.OutputNumber(),", %diff: ",pdiff, "at time ",snap.Time(),"in",self.Name()
         return snap
     
     def _SnapshotDict(self, update=True):
