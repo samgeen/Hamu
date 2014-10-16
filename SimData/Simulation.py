@@ -111,7 +111,7 @@ class Simulation(HamuIterable.HamuIterable):
         best = np.where(diff == np.min(diff))
         #best = self._outputs[best[0][0]]
         best = best[0][0]
-        pdiff = (times[best-1]-time) / time * 100.0 # Is a percentage, so multiply by 100
+        pdiff = (times[best]-time) / time * 100.0 # Is a percentage, so multiply by 100
         snap = snaps.values()[best]
         print "Found match with output",snap.OutputNumber(),", %diff: ",pdiff, "at time ",snap.Time(),"in",self.Name()
         return snap
