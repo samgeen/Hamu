@@ -19,7 +19,10 @@ class Simulations(object):
         Constructor
         '''
         # Set up directory to use for simulations
-        self._dir = Directory(Settings.Settings()["DataDir"]+"/Simulations/")
+        settings = Settings.Settings()
+        self._dir = Directory(settings["DataDir"]+"/workspaces/"+\
+                                  settings["CurrentWorkspace"]+\
+                                  "/Simulations/")
         # Open list of simulations
         self._simNames = self._dir.ListItems()
         

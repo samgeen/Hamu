@@ -12,14 +12,6 @@ import Workspace
 
 HOMEPATH = os.getenv("HOME")+"/.hamu/"
 
-
-
-def __call__():
-    '''
-    Convenience factory method; allows users to call the module to instantiate a new object
-    '''
-    return Settings()
-
 class Settings(object):
     '''
     Settings class; uses the $HOME/.hamu folder to synchronise the settings with what's on the HDD
@@ -78,7 +70,7 @@ class Settings(object):
         \/ /_/ \__,_|_| |_| |_|\__,_|
         
         Helping your simulations to hug and make up
-        Written by Sam Geen, 2013
+        Written by Sam Geen, 2013-2014
         
         For use as-is; no responsibility accepted for damage to your computer, person or family pets
         ---------------------------------------------------------------------------------------------------
@@ -89,6 +81,7 @@ class Settings(object):
         self["DataDir"] = dir.Path()
         wsname = "MyWorkspace"
         # Set up workspace with this name
+        # Also sets up the settings dictionary
         Workspace.Workspace(wsname)
         print "You're good to go!"
         

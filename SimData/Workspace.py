@@ -12,12 +12,6 @@ import Settings
 import Project
 from Hamu.Utils.Directory import Directory
 
-def __call__(name):
-    '''
-    Convenience factory method; allows users to call the module to instantiate a new object
-    '''
-    return Workspace(name)
-
 # Top level object; stores suites and a list of algorithms
 class Workspace(object):
     

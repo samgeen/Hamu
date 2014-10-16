@@ -8,8 +8,12 @@ Functions and classes that implement Hamu for Ramses data
 
 import os, sys, StringIO, Hamu
 import Hamu.SimData.Snapshot as Snapshot
+import Hamu.SimData.Workspace as Workspace
 
-def MakeSimulation(name, folder=os.getcwd()):
+def MakeSimulation(name, folder=os.getcwd(),workspace=None):
+    # Set the workspace if necessary
+    if workspace:
+        Workspace.Workspace(workspace)
     return Hamu.Simulation(name,folder,sys.modules[__name__],forceSetup=True)
 
 def MakeSnapshot(folder, outputNumber):

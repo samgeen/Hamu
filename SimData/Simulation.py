@@ -153,7 +153,6 @@ class Simulation(HamuIterable.HamuIterable):
         self._Save(nosetup=True)
         self._setup = True
                 
-            
     def _UpdateSnapshots(self):
         '''
         Find the snapshots inside the raw data folder and update the snapshots list
