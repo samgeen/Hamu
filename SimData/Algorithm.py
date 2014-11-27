@@ -80,7 +80,12 @@ class Algorithm(object):
         cache = CacheFile(snap, self)
         # Check to see if a cached dataset exists
         if cache.Exists():
-            output = cache.Load()
+            try:
+                output = cache.Load()
+            except EOFError:
+                # If the cache is corrupted, rerun anyway
+                output = self._RunAlgorithm(snap)
+                cache.Save(output)
         else:
             output = self._RunAlgorithm(snap)
             cache.Save(output)
