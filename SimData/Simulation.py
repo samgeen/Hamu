@@ -167,10 +167,13 @@ class Simulation(HamuIterable.HamuIterable):
             if stub in item:
                 # Strip out the item's digits and find the output number
                 num = int(re.sub("\D", "", item))
-                snap = self._codeModule.MakeSnapshot(self._path,num)
-                snap.SetupCache(self._cachedir)
-                # Add the snapshot to the array
-                snaps[num] = snap
+                try:
+                    snap = self._codeModule.MakeSnapshot(self._path,num)
+                    snap.SetupCache(self._cachedir)
+                    # Add the snapshot to the array
+                    snaps[num] = snap
+                except:
+                    print "ERROR: OUTPUT ",num," FAILED TO LOAD"
                 
     def _Save(self,nosetup=False):
         '''
