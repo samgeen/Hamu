@@ -41,16 +41,26 @@ class PymsesSnapshot(Snapshot.Snapshot):
         folder: The folder containing the data
         output: The number of the snapshot/output
         '''
-        # THIS STOPS THE ANNOYING PRINT STATEMENTS IN THE PYMSES.RAMSESOUTPUT CONSTRUCTOR
-        actualstdout = sys.stdout
-        sys.stdout = StringIO.StringIO()
-        # Run constructor
-        import pymses # Do this here in case pymses runs code in __init__
-        self._snapshot = pymses.RamsesOutput(folder,outputNumber)
-        # Reset stdout
-        sys.stdout = actualstdout        
+        self._snapshot = None
         # Add self to this object to allow tracking back up and using Algorithm 
         self._snapshot.hamusnap = self
+        self._setup = False
+
+    def _Setup():
+        '''
+        Run setup on this (runs after constructor to prevent slowdown for unused snapshots)
+        '''
+        # THIS STOPS THE ANNOYING PRINT STATEMENTS IN THE PYMSES.RAMSESOUTPUT CONSTRUCTOR
+        if not self._setup:
+            actualstdout = sys.stdout
+            sys.stdout = StringIO.StringIO()
+            # Run constructor
+            import pymses # Do this here in case pymses runs code in __init__
+            self._snapshot = pymses.RamsesOutput(folder,outputNumber)
+            # Reset stdout
+            sys.stdout = actualstdout   
+            # Done!
+            self._setup = True
 
 
     # ### IMPLEMENTATION OF ABSTRACT FUNCTIONS FOUND IN Snapshot ###
@@ -60,12 +70,14 @@ class PymsesSnapshot(Snapshot.Snapshot):
         Return the raw simulation data container
         This is usually a snapshot/output object in the given code's native analysis code
         '''
+        self._Setup()
         return self._snapshot
     
     def OutputNumber(self):
         '''
         Return the output number
         '''
+        self._Setup()
         return self._snapshot.iout
     
     def Time(self):
@@ -73,12 +85,14 @@ class PymsesSnapshot(Snapshot.Snapshot):
         Return the output time (for comparing outputs)
         TODO: Make this concept more concrete (i.e. make sure units/measurement methods match)
         '''
+        self._Setup()
         return self._snapshot.info["time"]
     
     def Path(self):
         '''
         Return the folder/file path for the raw snapshot data
         '''
+        self._Setup()
         return self._snapshot.output_repos
         
     
