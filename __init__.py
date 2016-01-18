@@ -28,3 +28,9 @@ def ListSimulations():
     sims = SimData.Simulations.Simulations()
     path = sims.CachePath()
     os.system("ls "+path)
+
+def CurrentWorkspace():
+    '''
+    Return the current workspace's name
+    '''
+    return SimData.Settings.Settings()["CurrentWorkspace"]
