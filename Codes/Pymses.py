@@ -9,8 +9,15 @@ Functions and classes that implement Hamu for Ramses data
 import os, sys, StringIO, Hamu
 import Hamu.SimData.Snapshot as Snapshot
 import Hamu.SimData.Workspace as Workspace
+import Hamu.SimData.Algorithm as Algorithm
 
 import pymses
+
+# This is to deal with the fact that loading a snapshot in 
+#    Pymses 4.0 is slow, so FindAtTime is very slow
+def _Time(snap):
+    return snap.info["time"]
+CacheTime = Hamu.Algorithm(_Time)
 
 def MakeSimulation(name, folder=os.getcwd(),workspace=None):
     # Set the workspace if necessary
@@ -90,7 +97,8 @@ class PymsesSnapshot(Snapshot.Snapshot):
         Return the output time (for comparing outputs)
         TODO: Make this concept more concrete (i.e. make sure units/measurement methods match)
         '''
-        return self._snapshot.info["time"]
+        # 
+        return CacheTime(self) #self._snapshot.info["time"]
     
     def Path(self):
         '''
