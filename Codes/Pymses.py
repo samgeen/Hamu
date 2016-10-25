@@ -15,9 +15,9 @@ import pymses
 
 # This is to deal with the fact that loading a snapshot in 
 #    Pymses 4.0 is slow, so FindAtTime is very slow
-def _Time(snap):
+def _PymsesCacheTimeHamu(snap):
     return snap.info["time"]
-CacheTime = Hamu.Algorithm(_Time)
+CacheTime = Hamu.Algorithm(_PymsesCacheTimeHamu)
 
 def MakeSimulation(name, folder=os.getcwd(),workspace=None):
     # Set the workspace if necessary
