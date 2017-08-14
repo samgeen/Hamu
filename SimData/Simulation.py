@@ -166,14 +166,21 @@ class Simulation(HamuIterable.HamuIterable):
             # Does the item match an output?
             if stub in item:
                 # Strip out the item's digits and find the output number
-                num = int(re.sub("\D", "", item))
+                validOutput = True
                 try:
-                    snap = self._codeModule.MakeSnapshot(self._path,num)
-                    snap.SetupCache(self._cachedir)
-                    # Add the snapshot to the array
-                    snaps[num] = snap
-                except:
-                    print "ERROR: OUTPUT ",num," FAILED TO LOAD"
+                    num = int(re.sub("\D", "", item))
+                except ValueError:
+                    validOutput = False
+                    print item, "not a valid output, ignoring"
+                if validOutput:
+                    try:
+                        snap = self._codeModule.MakeSnapshot(self._path,num)
+                        snap.SetupCache(self._cachedir)
+                        # Add the snapshot to the array
+                        snaps[num] = snap
+                    except:
+                        print "ERROR: OUTPUT ",num," FAILED TO LOAD"
+                        raise ValueError
                 
     def _Save(self,nosetup=False):
         '''
@@ -182,6 +189,9 @@ class Simulation(HamuIterable.HamuIterable):
         if not nosetup:
             self._Setup()
         filename = self._CacheFilename()
+        if self._codeModule is None:
+            print "Cache file",filename,"has no codeModule"
+            raise ValueError
         pikfile = open(filename,"wb")
         pik.dump(self._name,pikfile)
         pik.dump(self._path,pikfile)
@@ -200,10 +210,14 @@ class Simulation(HamuIterable.HamuIterable):
         if os.path.exists(filename):
             pikfile = open(filename,"rb")
             try:
-                self._name = pik.load(pikfile)
-                self._path = pik.load(pikfile)
-                codeModuleName = pik.load(pikfile)
-                self._cachedir = pik.load(pikfile)
+                try:
+                    self._name = pik.load(pikfile)
+                    self._path = pik.load(pikfile)
+                    codeModuleName = pik.load(pikfile)
+                    self._cachedir = pik.load(pikfile)
+                except EOFError:
+                    print "Cache file", filename, "failed to load"
+                    raise EOFError
             except:
                 print "Error loading cache for simulation ", self.Name()
                 raise
