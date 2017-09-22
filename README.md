@@ -31,54 +31,54 @@ STARTING UP
 
 First, import Hamu
 ```python
->>> import Hamu
+import Hamu
 ```
 
 Make a workspace by calling, e.g.:
 ```python
->>> workspace = Hamu.Workspace("GalaxiesProject")
+workspace = Hamu.Workspace("GalaxiesProject")
 ```
 You can use multiple workspaces at the same time. For example, each time you start a distinct suite of simulations you can use a separate workspace. It's often a good idea to put this at the top of your code so you're sure you're using the correct repository.
 
 Now, you can make a simulation object. The easiest way to set up a simulation is to go to where your outputs are stored, open python and enter (for example):
 ```python
->>> import Hamu
->>> Hamu.MakePymses("DarkMatterOnlyRun")
+import Hamu
+Hamu.MakePymses("DarkMatterOnlyRun")
 ```
 where "DarkMatterOnlyRun" is a unique name to describe your simulation that you will use from now on.
 
 Hamu now knows where your simulation is. To access it anywhere on the machine, use:
 ```python
->>> sim = Hamu.Simulation("DarkMatterOnlyRun")
+sim = Hamu.Simulation("DarkMatterOnlyRun")
 ```
 "sim" is an object that you can use to access your snapshots.
 
 You can give a simulation a second label, e.g. for plotting with readable legends
 ```python
->>> sim.Label("Dark Matter Only (No Gas)")
->>> # do stuff here
->>> plt.plot(radii,profile,label=sim.Label())
->>> plt.legend()
+sim.Label("Dark Matter Only (No Gas)")
+# do stuff here
+plt.plot(radii,profile,label=sim.Label())
+plt.legend()
 ```
 
 If you want to use the same simulations for multiple projects without splitting into separate workspaces (which will duplicate the saved results), you can use Project objects. To create a project and add "sim" to it, call:
 ```python
->>> project = Hamu.Project("GalaxyComparisonProject")
->>> project.AddSimulation(sim)
+project = Hamu.Project("GalaxyComparisonProject")
+project.AddSimulation(sim)
 ```
 The project will be saved in the workspace and will exist when you re-load python. To remove a simulation, use:
 ```python
->>> project.Remove(sim)
+project.Remove(sim)
 ```
 You can also pass the simulation's unique name instead of a simulation object:
 ```python
->>> project.Remove("DarkMatterOnlyRun")
+project.Remove("DarkMatterOnlyRun")
 ```
 
 To run through the simulations in a project, call, e.g.
 ```python
->>> for sim in project.Simulations():
->>>     print "Simulation name:", sim.Name()
+for sim in project.Simulations():
+    print "Simulation name:", sim.Name()
 ```
 
 ANALYSING A SIMULATION
@@ -86,8 +86,8 @@ ANALYSING A SIMULATION
 
 A Simulation holds a set of snapshots. These are wrappers around snapshot objects given by the analysis code (Pymses,YT,etc). To run through all the snapshots in a simulation, call:
 ```python
->>> for snap in sim.Snapshots():
->>>     print "Snapshot number, time:", snap.OutputNumber(), snap.Time()
+for snap in sim.Snapshots():
+    print "Snapshot number, time:", snap.OutputNumber(), snap.Time()
 ```
 
 To analyse a function, you need to first create an Algorithm. This is a smart function that wraps around your existing analysis functions. You must use functions with the following structure:
@@ -96,19 +96,19 @@ To analyse a function, you need to first create an Algorithm. This is a smart fu
 - Has a return value that can be pickled by python (optional)
 Say you have a function:
 ```python
->>> def MakeProfile(pymsesoutput,"temperature",maxradius=4.0):
->>>     # do stuff here
->>>     return radii, profile
+def MakeProfile(pymsesoutput,"temperature",maxradius=4.0):
+    # do stuff here
+    return radii, profile
 ```
 Call the following line:
 ```python
->>> MakeProfileHamu = Hamu.Algorithm(MakeProfile)
+MakeProfileHamu = Hamu.Algorithm(MakeProfile)
 ```
 Now MakeProfileHamu is a smart function you can call on Hamu snapshots like a normal function
 ```python
->>> for snap in sim.Snapshots():
->>>     radii, profile = MakeProfileHamu(snap,"temperature",maxradius=4.0)
->>>     plt.plot(radii, profile, label="Snapshot "+str(snap.OutputNumber())
+for snap in sim.Snapshots():
+    radii, profile = MakeProfileHamu(snap,"temperature",maxradius=4.0)
+    plt.plot(radii, profile, label="Snapshot "+str(snap.OutputNumber())
 ```
 The first time you run this Hamu will run MakeProfile and save the data. The second time you run it (e.g. you have more outputs, you want to change the axes or linestyles), it will read it from a "cache" file in the .hamu folder.
 
@@ -118,25 +118,25 @@ If you want to avoid rerunning something but don't need to save the results, jus
 
 Each snapshot contains a function RawData() that returns the raw (e.g. Pymses) snapshots:
 ```python
->>> ro = snap.RawData()
->>> print "Snapshot number", ro.iout
+ro = snap.RawData()
+print "Snapshot number", ro.iout
 ```
 Likewise, Hamu will add a "hamusnap" variable to the raw snapshots to allow the code to reach back up:
 ```python
->>> snap = ro.hamusnap
->>> radii, profile = MakeProfileHamu(snap,"temperature",maxradius=4.0)
+snap = ro.hamusnap
+radii, profile = MakeProfileHamu(snap,"temperature",maxradius=4.0)
 ```
 
 You can also nest Hamu functions in this way. For example, if you want to run a function inside another one and make both Hamu smart functions, you can use:
 ```python
->>> def SecondFunction(snap,var):
->>>     return snap.iout*var**2.0 # or whatever
->>> SecondFunctionHamu = Hamu.Algorithm(SecondFunction)
->>> def FirstFunction(snap,var):
->>>     return SecondFunctionHamu(snap.hamusnap,var+2)
->>> FirstFunctionHamu = Hamu.Algorithm(FirstFunction)
->>> for snap in sim.Snapshots():
->>>     print "My result:", FirstFunctionHamu(snap,20.0)
+def SecondFunction(snap,var):
+    return snap.iout*var**2.0 # or whatever
+SecondFunctionHamu = Hamu.Algorithm(SecondFunction)
+def FirstFunction(snap,var):
+    return SecondFunctionHamu(snap.hamusnap,var+2)
+FirstFunctionHamu = Hamu.Algorithm(FirstFunction)
+for snap in sim.Snapshots():
+    print "My result:", FirstFunctionHamu(snap,20.0)
 ```
 
 HAMULITE.py
