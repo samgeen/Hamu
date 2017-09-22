@@ -1,6 +1,7 @@
 Hamu
-Sam Geen, 2012-2017
 ====
+
+***Sam Geen, 2012-2017***
 
 Simulation analysis is a time-consuming and complex task. Hamu wraps around existing Python analysis tools to:
 1) Cleanly organise your simulations with user-defined labels
