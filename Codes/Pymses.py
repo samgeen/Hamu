@@ -66,8 +66,11 @@ class PymsesSnapshot(Snapshot.Snapshot):
             # Run constructor
             #actualstdout = sys.stdout
             #sys.stdout = StringIO.StringIO()
-            self._snapshotPYMSES = \
-                pymses.RamsesOutput(self._folder,self._outputNumber)
+            try:
+                self._snapshotPYMSES = pymses.RamsesOutput(self._folder,self._outputNumber)
+            except KeyError:
+                print "Key Error loading snapshot! Folder, output number:", self._folder,self._outputNumber
+                import pdb; pdb.set_trace()
             # Add self to this object to allow tracking back up 
             #   and using Algorithm
             self._snapshotPYMSES.hamusnap = self
