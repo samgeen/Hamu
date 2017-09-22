@@ -30,7 +30,9 @@ STARTING UP
 -----------
 
 First, import Hamu
+```python
 >>> import Hamu
+```
 
 Make a workspace by calling, e.g.:
 >>> workspace = Hamu.Workspace("GalaxiesProject")
