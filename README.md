@@ -18,6 +18,8 @@ SETTING UP
 Hamu does not have any external dependencies except the analysis package you want to use. It is developed for Pymses but there is a wrapper for YT included (email if you have problems with this wrapper). Make sure the directory containing Hamu is in your PYTHONPATH environment variable:
 > $PYTHONPATH=$PYTHONPATH:/my/scripts/directory
 
+Hamu should work on any Unix system (OSX, Linux, Ubuntu on Windows) with Python 2.7 or similar.
+
 The first time you run Hamu it will do some setting up and make a ".hamu" folder in your home directory and create an empty workspace "MyWorkspace". 
 The ".hamu" folder is where all the saved outputs are stored, so you may want to symbolic link to somewhere else on your filesystem (e.g. "mkdir /my/big/drive/.hamu; ln -s /my/big/drive/.hamu")
 
@@ -41,6 +43,12 @@ where "DarkMatterOnlyRun" is a unique name to describe your simulation that you 
 Hamu now knows where your simulation is. To access it anywhere on the machine, use:
 >>> sim = Hamu.Simulation("DarkMatterOnlyRun")
 "sim" is an object that you can use to access your snapshots.
+
+You can give a simulation a second label, e.g. for plotting with readable legends
+>>> sim.Label("Dark Matter Only (No Gas)")
+>>> # do stuff here
+>>> plt.plot(radii,profile,label=sim.Label())
+>>> plt.legend()
 
 If you want to use the same simulations for multiple projects without splitting into separate workspaces (which will duplicate the saved results), you can use Project objects. To create a project and add "sim" to it, call:
 >>> project = Hamu.Project("GalaxyComparisonProject")
@@ -79,7 +87,29 @@ The first time you run this Hamu will run MakeProfile and save the data. The sec
 
 WARNING: Hamu does not (yet) know if you changed the snapshots or functions. You will have to go into "~/.hamu/workspaces/WorkspaceName/Simulations/SimulationName/snap*/" and delete by hand any files that begin with "MakeProfile" (or the name of your function). To check which files you used with which inputs, you can check the ".info" files.
 
+If you want to avoid rerunning something but don't need to save the results, just return None in your function. For example, if you are making images as your simulation is running and don't want to re-make the image every time your simulation advances.
 
+Each snapshot contains a function RawData() that returns the raw (e.g. Pymses) snapshots:
+>>> ro = snap.RawData()
+>>> print "Snapshot number", ro.iout
+Likewise, Hamu will add a "hamusnap" variable to the raw snapshots to allow the code to reach back up:
+>>> snap = ro.hamusnap
+>>> radii, profile = MakeProfileHamu(snap,"temperature",maxradius=4.0)
+
+You can also nest Hamu functions in this way. For example, if you want to run a function inside another one and make both Hamu smart functions, you can use:
+>>> def SecondFunction(snap,var):
+>>>     return snap.iout*var**2.0 # or whatever
+>>> SecondFunctionHamu = Hamu.Algorithm(SecondFunction)
+>>> def FirstFunction(snap,var):
+>>>     return SecondFunctionHamu(snap.hamusnap,var+2)
+>>> FirstFunctionHamu = Hamu.Algorithm(FirstFunction)
+>>> for snap in sim.Snapshots():
+>>>     print "My result:", FirstFunctionHamu(snap,20.0)
+
+HAMULITE.py
+-----------
+
+HamuLite.py is a stripped-down version of Hamu that doesn't save simulation structures but does allow you to cache/save function results. The advantage is that it's a single file that is a lot easier to move around and deploy. It will make a "cache/" folder in the working directory instead of using "~/.hamu".
 
 SOURCE CODE
 -----------
@@ -88,4 +118,7 @@ Experienced users are encouraged to explore the code. Hamu is a more-or-less obj
 
 Suggestions for new features and updates are welcome.
 
+CREDITS
+-------
 
+This code is developed by Sam Geen (samgeen@gmail.com)
